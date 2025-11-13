@@ -122,7 +122,7 @@ const loginUser = async (req, res) => {
 };
 
 // Get current user from session
-const getCurrentUser = (req, res) => {
+const getCurrentUser = async (req, res) => {
   console.log('\n👤 Current session check:', {
     sessionId: req.sessionID,
     hasUser: !!req.session.user,
@@ -130,11 +130,33 @@ const getCurrentUser = (req, res) => {
   });
   
   if (req.session.user) {
-    res.json({ 
-      success: true, 
-      user: req.session.user,
-      sessionId: req.sessionID
-    });
+    try {
+      // Fetch listening minutes from database
+      const [users] = await pool.query(
+        'SELECT listening_minutes FROM users WHERE id = ?',
+        [req.session.user.id]
+      );
+      
+      // Add listening minutes to user object if found
+      const userWithListeningData = {
+        ...req.session.user,
+        listening_minutes: users.length > 0 ? users[0].listening_minutes : 0
+      };
+      
+      res.json({ 
+        success: true, 
+        user: userWithListeningData,
+        sessionId: req.sessionID
+      });
+    } catch (error) {
+      console.error('Error fetching user listening data:', error);
+      // Return user without listening data if there's an error
+      res.json({ 
+        success: true, 
+        user: req.session.user,
+        sessionId: req.sessionID
+      });
+    }
   } else {
     console.log('❌ No active session found');
     res.status(401).json({ 
@@ -200,7 +222,6 @@ const testDbConnection = async (req, res) => {
   }
 };
 
-// Get user favorites (songs and artists)
 // Get all artists
 const getAllArtists = async (req, res) => {
   try {
@@ -350,129 +371,186 @@ const addFavoriteSong = async (req, res) => {
   }
 };
 
-// Simple in-memory cache with 5 minute TTL
-const similarityCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Remove favorite artist for user
+const removeFavoriteArtist = async (req, res) => {
+  const { userId, artistId } = req.query;
+  
+  if (!userId || !artistId) {
+    return res.status(400).json({
+      success: false,
+      message: 'User ID and Artist ID are required'
+    });
+  }
 
-// Calculate similarity between users based on favorite songs with pagination and caching
+  try {
+    await pool.query(
+      'DELETE FROM user_fav_artists WHERE user_id = ? AND artist_id = ?',
+      [userId, artistId]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Artist removed from favorites'
+    });
+  } catch (error) {
+    console.error('Error removing favorite artist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error removing favorite artist'
+    });
+  }
+};
+
+// Remove favorite song for user
+const removeFavoriteSong = async (req, res) => {
+  const { userId, songId } = req.query;
+  
+  if (!userId || !songId) {
+    return res.status(400).json({
+      success: false,
+      message: 'User ID and Song ID are required'
+    });
+  }
+
+  try {
+    await pool.query(
+      'DELETE FROM user_fav_songs WHERE user_id = ? AND song_id = ?',
+      [userId, songId]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Song removed from favorites'
+    });
+  } catch (error) {
+    console.error('Error removing favorite song:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error removing favorite song'
+    });
+  }
+};
+
+// Get user similarity based on favorite songs and artists
 const getUserSimilarity = async (req, res) => {
   try {
-    const { userId, page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
+    const currentUserId = req.session.user?.id;
     
-    if (!userId) {
-      return res.status(400).json({
+    if (!currentUserId) {
+      return res.status(401).json({
         success: false,
-        message: 'User ID is required'
+        message: 'Not authenticated'
       });
     }
 
-    // Check cache first
-    const cacheKey = `similarity:${userId}:${page}:${limit}`;
-    const cached = similarityCache.get(cacheKey);
-    
-    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-      return res.json(cached.data);
-    }
+    console.log('🔍 Calculating similarity for user:', currentUserId);
 
-    // Get current user's favorite songs (only the IDs we need)
+    // Get current user's favorite songs and artists
     const [currentUserSongs] = await pool.query(
       `SELECT song_id FROM user_fav_songs WHERE user_id = ?`,
-      [userId]
+      [currentUserId]
     );
 
-    if (currentUserSongs.length === 0) {
-      const response = {
-        success: true,
-        data: {
-          currentUser: { id: userId },
-          similarities: [],
-          pagination: {
-            page: parseInt(page),
-            limit: parseInt(limit),
-            total: 0,
-            totalPages: 0
-          }
-        }
-      };
-      
-      // Cache the empty result
-      similarityCache.set(cacheKey, {
-        timestamp: Date.now(),
-        data: response
-      });
-      
-      return res.json(response);
-    }
-
-    const currentSongIds = currentUserSongs.map(s => s.song_id);
-    const currentSongIdsPlaceholder = currentSongIds.map(() => '?').join(',');
-
-    // Simplified query that's more efficient
-    const [similarUsers] = await pool.query(
-      `SELECT 
-        u.id as userId,
-        u.name as userName,
-        COUNT(DISTINCT ufs.song_id) as commonSongs,
-        ROUND(
-          (COUNT(DISTINCT ufs.song_id) / 
-          (SELECT COUNT(DISTINCT song_id) FROM user_fav_songs WHERE user_id = u.id + ? - COUNT(DISTINCT ufs.song_id)) * 100),
-          2
-        ) as similarity
-      FROM users u
-      JOIN user_fav_songs ufs ON u.id = ufs.user_id AND ufs.song_id IN (${currentSongIdsPlaceholder})
-      WHERE u.id != ?
-      GROUP BY u.id, u.name
-      HAVING commonSongs > 0
-      ORDER BY commonSongs DESC
-      LIMIT ? OFFSET ?`,
-      [
-        currentSongIds.length,
-        ...currentSongIds,
-        userId,
-        parseInt(limit),
-        parseInt(offset)
-      ]
+    const [currentUserArtists] = await pool.query(
+      `SELECT artist_id FROM user_fav_artists WHERE user_id = ?`,
+      [currentUserId]
     );
 
-    // Get total count for pagination
-    const [totalCount] = await pool.query(
-      `SELECT COUNT(DISTINCT u.id) as total
-       FROM users u
-       JOIN user_fav_songs ufs ON u.id = ufs.user_id
-       WHERE u.id != ? AND ufs.song_id IN (${currentSongIdsPlaceholder})`,
-      [userId, ...currentSongIds]
+    // Convert to sets for faster lookup
+    const currentUserSongIds = new Set(currentUserSongs.map(s => s.song_id));
+    const currentUserArtistIds = new Set(currentUserArtists.map(a => a.artist_id));
+
+    // Get all users except current user
+    const [allUsers] = await pool.query(
+      'SELECT id, name, email FROM users WHERE id != ? ORDER BY name',
+      [currentUserId]
     );
 
-    const total = totalCount[0]?.total || 0;
-    const totalPages = Math.ceil(total / limit);
+    // Get all favorite songs and artists for all users
+    const userids = allUsers.map(u => u.id);
+    
+    // Get all favorite songs for all users in one query
+    const [allUserSongs] = userids.length > 0
+      ? await pool.query(
+          `SELECT user_id, song_id FROM user_fav_songs WHERE user_id IN (?)`,
+          [userids]
+        )
+      : [[], []];
 
-    // Get current user info
-    const [currentUser] = await pool.query(
-      'SELECT id, name FROM users WHERE id = ?',
-      [userId]
-    );
+    // Get all favorite artists for all users in one query
+    const [allUserArtists] = userids.length > 0
+      ? await pool.query(
+          `SELECT user_id, artist_id FROM user_fav_artists WHERE user_id IN (?)`,
+          [userids]
+        )
+      : [[], []];
 
-    const response = {
-      success: true,
-      data: {
-        currentUser: currentUser[0] || { id: userId },
-        similarities: similarUsers,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages
-        }
-      }
-    };
+    console.log(`📊 Comparing with ${allUsers.length} other users`);
 
-    // Cache the result
-    similarityCache.set(cacheKey, {
-      timestamp: Date.now(),
-      data: response
+    // Group favorites by user ID for faster lookup
+    const userSongsMap = {};
+    const userArtistsMap = {};
+    
+    // Initialize maps
+    allUsers.forEach(user => {
+      userSongsMap[user.id] = new Set();
+      userArtistsMap[user.id] = new Set();
     });
 
+    // Populate song maps
+    allUserSongs.forEach(row => {
+      if (userSongsMap[row.user_id]) {
+        userSongsMap[row.user_id].add(row.song_id);
+      }
+    });
+
+    // Populate artist maps
+    allUserArtists.forEach(row => {
+      if (userArtistsMap[row.user_id]) {
+        userArtistsMap[row.user_id].add(row.artist_id);
+      }
+    });
+
+    // Calculate similarity for each user
+    const similarities = [];
+
+    for (const otherUser of allUsers) {
+      const otherUserSongIds = userSongsMap[otherUser.id] || new Set();
+      const otherUserArtistIds = userArtistsMap[otherUser.id] || new Set();
+
+      // Calculate Jaccard similarity for songs
+      const commonSongs = [...currentUserSongIds].filter(id => otherUserSongIds.has(id)).length;
+      const totalSongs = new Set([...currentUserSongIds, ...otherUserSongIds]).size;
+      const songSimilarity = totalSongs > 0 ? commonSongs / totalSongs : 0;
+
+      // Calculate Jaccard similarity for artists
+      const commonArtists = [...currentUserArtistIds].filter(id => otherUserArtistIds.has(id)).length;
+      const totalArtists = new Set([...currentUserArtistIds, ...otherUserArtistIds]).size;
+      const artistSimilarity = totalArtists > 0 ? commonArtists / totalArtists : 0;
+
+      // Combined similarity (equal weight to songs and artists)
+      const similarity = (songSimilarity + artistSimilarity) / 2;
+      const percentage = Math.round(similarity * 100);
+
+      if (percentage > 0) {
+        similarities.push({
+          userId: otherUser.id,
+          userName: otherUser.name,
+          email: otherUser.email,
+          score: percentage
+        });
+      }
+    }
+
+    // Sort by similarity score (descending)
+    similarities.sort((a, b) => b.score - a.score);
+
+    console.log(`✅ Found ${similarities.length} similar users`);
+
+    res.json({
+      success: true,
+      data: similarities
+    });
   } catch (error) {
     console.error('Error calculating user similarity:', error);
     res.status(500).json({
@@ -482,16 +560,135 @@ const getUserSimilarity = async (req, res) => {
   }
 };
 
+// Get all users with their top 5 songs and top 5 artists
+const getAllUsersWithFavorites = async (req, res) => {
+  try {
+    console.log('📋 Fetching all users with their favorites...');
+
+    // Get all users
+    const [users] = await pool.query(
+      'SELECT id, name, email, listening_minutes FROM users ORDER BY name'
+    );
+
+    console.log(`✅ Found ${users.length} users`);
+
+    // For each user, get their favorite songs and artists
+    const usersWithFavorites = await Promise.all(
+      users.map(async (user) => {
+        // Get favorite songs
+        const [songs] = await pool.query(
+          `SELECT s.id, s.song_name, a.artist_name
+           FROM songs s
+           JOIN artists a ON s.artist_id = a.id
+           JOIN user_fav_songs ufs ON s.id = ufs.song_id
+           WHERE ufs.user_id = ?`,
+          [user.id]
+        );
+
+        // Get favorite artists
+        const [artists] = await pool.query(
+          `SELECT a.id, a.artist_name
+           FROM artists a
+           JOIN user_fav_artists ufa ON a.id = ufa.artist_id
+           WHERE ufa.user_id = ?`,
+          [user.id]
+        );
+
+        return {
+          userId: user.id,
+          userName: user.name,
+          email: user.email,
+          listeningMinutes: user.listening_minutes || 0,
+          topSongs: songs,
+          topArtists: artists
+        };
+      })
+    );
+
+    console.log('✅ Successfully fetched all users with favorites');
+
+    res.json({
+      success: true,
+      data: {
+        users: usersWithFavorites
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching all users with favorites:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching users',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Set password for new Spotify users
+const setUserPassword = async (req, res) => {
+  try {
+    const { userId, password } = req.body;
+    
+    if (!userId || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID and password are required'
+      });
+    }
+
+    // Validate password (minimum 6 characters)
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+
+    // Check if user exists and doesn't already have a password
+    const [users] = await pool.query(
+      'SELECT id, password FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update user password (plain text for now, use bcrypt in production)
+    await pool.query(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [password, userId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Password set successfully'
+    });
+  } catch (error) {
+    console.error('Error setting user password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error setting password'
+    });
+  }
+};
+
 module.exports = {
   loginUser,
   getCurrentUser,
   logoutUser,
-  getUserSimilarity,
   isAuthenticated,
   testDbConnection,
-  getUserFavorites,
   getAllArtists,
   getAllSongs,
+  getUserFavorites,
   addFavoriteArtist,
-  addFavoriteSong
+  addFavoriteSong,
+  removeFavoriteArtist,
+  removeFavoriteSong,
+  getUserSimilarity,
+  getAllUsersWithFavorites,
+  setUserPassword
 };

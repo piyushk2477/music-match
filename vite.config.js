@@ -11,7 +11,7 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8888',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
@@ -25,6 +25,11 @@ export default defineConfig({
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         }
+      },
+      '/callback': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+        secure: false
       }
     }
   },

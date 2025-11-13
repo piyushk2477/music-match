@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Ranking from "./pages/Ranking";
 import Compare from "./pages/Compare";
+import AuthCallback from "./pages/AuthCallback";
 
 // A wrapper to handle authentication
 const PrivateRoute = ({ children }) => {
@@ -13,10 +14,45 @@ const PrivateRoute = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Check if user is authenticated by verifying with backend
+    const verifyAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.user) {
+            // Update localStorage with fresh user data
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setIsAuthenticated(true);
+          } else {
+            throw new Error('Invalid auth response');
+          }
+        } else {
+          throw new Error('Not authenticated');
+        }
+      } catch (error) {
+        console.error('Auth verification failed:', error);
+        localStorage.removeItem('user');
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     const user = localStorage.getItem('user');
-    setIsAuthenticated(!!user);
-    setIsLoading(false);
+    if (user) {
+      verifyAuth();
+    } else {
+      setIsLoading(false);
+      setIsAuthenticated(false);
+    }
   }, []);
 
   if (isLoading) {
@@ -43,9 +79,21 @@ const AppRoutes = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    setIsAuthenticated(false);
-    navigate('/login');
+    // Call backend logout endpoint
+    fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).catch(err => {
+      console.error('Error during logout:', err);
+    }).finally(() => {
+      // Clear local storage regardless of backend response
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
+      navigate('/login');
+    });
   };
 
   return (
@@ -61,6 +109,11 @@ const AppRoutes = () => {
             </div>
           )
         } 
+      />
+      
+      <Route 
+        path="/auth/callback" 
+        element={<AuthCallback onLogin={handleLogin} />} 
       />
       
       <Route 
@@ -83,7 +136,7 @@ const AppRoutes = () => {
         path="/profile" 
         element={
           <PrivateRoute>
-            <Profile onBack={() => navigate('/home')} />
+            <Profile onBack={() => navigate('/home')} onLogout={handleLogout} />
           </PrivateRoute>
         } 
       />

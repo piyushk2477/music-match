@@ -80,33 +80,8 @@ async function testConnection() {
         )
       `);
       console.log('✅ Users table created successfully');
-      
-      // Add test user
-      console.log('🔧 Adding test user...');
-      await connection.query(
-        'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-        ['testuser', 'test@example.com', 'test123']
-      );
-      console.log('✅ Test user added (testuser/test123)');
     } else {
       console.log('✅ Users table exists');
-      
-      // Check if test user exists
-      const [users] = await connection.query(
-        'SELECT * FROM users WHERE name = ?', 
-        ['testuser']
-      );
-      
-      if (users.length === 0) {
-        console.log('🔧 Adding test user...');
-        await connection.query(
-          'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-          ['testuser', 'test@example.com', 'test123']
-        );
-        console.log('✅ Test user added (testuser/test123)');
-      } else {
-        console.log('ℹ️  Test user already exists');
-      }
     }
     
     // Show some stats

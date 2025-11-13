@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Login = ({ onLogin, isAuthenticated }) => {
   const navigate = useNavigate();
@@ -10,181 +11,131 @@ const Login = ({ onLogin, isAuthenticated }) => {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (error) setError('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Basic validation
-    if (!credentials.email.trim()) {
-      setError('Email is required');
-      return;
-    }
-
-    if (!credentials.password) {
-      setError('Password is required');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const loginData = {
-        email: credentials.email, // Changed from username to email to match backend expectation
-        password: credentials.password
-      };
-      
-      console.log('Sending login request to:', '/api/auth/login');
-      console.log('Request payload:', loginData);
-      
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Login error response:', errorData);
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Login successful, response:', data);
-
-      if (!data.success) {
-        throw new Error(data.message || 'Login failed. Please try again.');
-      }
-
-      // Call the onLogin callback with the user data
-      if (data.user) {
-        onLogin(data.user);
-        navigate('/home');
-      } else {
-        throw new Error('No user data received from server');
-      }
-
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(error.message || 'An error occurred during login. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSpotifyLogin = () => {
+    window.location.href = '/api/auth/spotify';
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center from-purple-900 to-gray-900 py-12 px-4">
-      <div className="w-full max-w-md space-y-8">
-
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen flex items-center justify-center bg-black py-12 px-4"
+    >
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="w-full max-w-md space-y-8"
+      >
         {/* Header */}
-        <div className="text-center">
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-white">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-center text-sm text-purple-200">
-            Sign in to continue to Music Match
-          </p>
-        </div>
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-center"
+        >
+          <motion.h1 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+            className="text-5xl font-extrabold text-green-400 mb-2"
+          >
+            🎵 Music Match
+          </motion.h1>
+          <motion.h2 
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-4 text-2xl font-bold text-white"
+          >
+            Connect Through Music
+          </motion.h2>
+          <motion.p 
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-2 text-gray-400"
+          >
+            Discover people who share your music taste
+          </motion.p>
+        </motion.div>
 
         {/* Login Box */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-8">
-
-          {error && (
-            <div className="mb-6 bg-red-500/20 border-l-4 border-red-500 text-red-200 p-4 rounded">
-              {error}
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-purple-200 mb-2">
-                Email Address
-              </label>
-
-              <input
-                type="email"
-                name="email"
-                id="email"
-                className="w-full p-3 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="example@gmail.com"
-                value={credentials.email}
-                onChange={handleChange}
-                disabled={isLoading}
-                autoComplete="email"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-purple-200 mb-2">
-                Password
-              </label>
-
-              <input
-                type="password"
-                name="password"
-                id="password"
-                className="w-full p-3 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="••••••••"
-                value={credentials.password}
-                onChange={handleChange}
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3  from-purple-600 to-pink-600 rounded-xl text-white font-medium hover:opacity-90 transition disabled:opacity-50"
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="bg-gray-900 rounded-2xl shadow-2xl p-8 border border-gray-800"
+        >
+          <motion.div 
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="space-y-6"
+          >
+            {/* Spotify Login Button */}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={handleSpotifyLogin}
+              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/50"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
-
-          {/* Signup Link */}
-          <div className="text-center mt-6">
-            <p className="text-purple-300">
-              Don't have an account?{" "}
-              <span
-                onClick={() => navigate("/register")}
-                className="text-white font-medium cursor-pointer hover:text-purple-200"
+              <motion.svg 
+                initial={{ rotate: -10 }}
+                animate={{ rotate: 0 }}
+                transition={{ delay: 0.8 }}
+                className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"
               >
-                Sign up
-              </span>
-            </p>
-          </div>
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </motion.svg>
+              Continue with Spotify
+            </motion.button>
 
-        </div>
-      </div>
-    </div>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="text-center text-sm text-gray-500"
+            >
+              By continuing, you agree to connect your Spotify account and discover music lovers like you
+            </motion.p>
+          </motion.div>
+        </motion.div>
+
+        {/* Features */}
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mt-8 space-y-3"
+        >
+          {[1, 2, 3].map((item, index) => (
+            <motion.div 
+              key={item}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.1 + index * 0.1 }}
+              className="flex items-center gap-3 text-gray-400"
+            >
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white"
+              >
+                ✓
+              </motion.div>
+              <span>
+                {item === 1 && 'Find users with similar music taste'}
+                {item === 2 && 'Discover new songs and artists'}
+                {item === 3 && 'Connect through your favorite music'}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -4,6 +4,7 @@ const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./auth');
+const passport = require('./spotify-auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,8 +13,12 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173'
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'http://localhost:3002',
+  'http://127.0.0.1:3002',
+  'http://localhost:8888',
+  'http://127.0.0.1:8888'
 ];
 
 // Middleware
@@ -69,6 +74,10 @@ app.use(session({
   // rolling: true
 }));
 
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
@@ -80,6 +89,73 @@ app.get('/api/test-db', authRoutes.testDbConnection);
 app.post('/api/auth/login', authRoutes.loginUser);
 app.get('/api/auth/me', authRoutes.isAuthenticated, authRoutes.getCurrentUser);
 app.post('/api/auth/logout', authRoutes.logoutUser);
+app.post('/api/auth/set-password', authRoutes.isAuthenticated, authRoutes.setUserPassword);
+
+// Spotify OAuth Routes
+app.get('/api/auth/spotify', passport.authenticate('spotify', {
+  scope: ['user-read-email', 'user-top-read', 'user-read-recently-played'],
+  showDialog: true
+}));
+
+app.get('/callback', 
+  (req, res, next) => {
+    passport.authenticate('spotify', (err, user, info) => {
+      if (err) {
+        console.error('Spotify auth error:', err);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
+        return res.redirect(`${frontendUrl}/login?error=auth_failed`);
+      }
+      if (!user) {
+        console.error('No user returned from Spotify');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
+        return res.redirect(`${frontendUrl}/login?error=no_user`);
+      }
+      req.logIn(user, async (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
+          return res.redirect(`${frontendUrl}/login?error=login_failed`);
+        }
+        
+        // Fetch listening minutes from database
+        let listeningMinutes = 0;
+        try {
+          const pool = require('./db');
+          const [users] = await pool.query(
+            'SELECT listening_minutes FROM users WHERE id = ?',
+            [user.id]
+          );
+          listeningMinutes = users.length > 0 ? users[0].listening_minutes : 0;
+        } catch (error) {
+          console.error('Error fetching listening minutes:', error);
+        }
+        
+        // Store user in session
+        req.session.user = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          spotify_id: user.spotify_id,
+          isNewUser: user.isNewUser || false,
+          listening_minutes: listeningMinutes
+        };
+        
+        console.log('✅ Session created:', {
+          sessionId: req.sessionID,
+          userId: user.id,
+          userName: user.name
+        });
+        
+        console.log('✅ Spotify authentication successful for user:', user.id);
+        console.log('FRONTEND_URL from env:', process.env.FRONTEND_URL);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
+        const redirectUrl = `${frontendUrl}/auth/callback?success=true`;
+        console.log('Redirecting to:', redirectUrl);
+        return res.redirect(redirectUrl);
+      });
+    })(req, res, next);
+  }
+);
 
 // Favorites
 app.get('/api/user/favorites', authRoutes.isAuthenticated, authRoutes.getUserFavorites);
@@ -88,6 +164,9 @@ app.post('/api/user/favorites/song', authRoutes.isAuthenticated, authRoutes.addF
 
 // User similarity
 app.get('/api/user/similarity', authRoutes.isAuthenticated, authRoutes.getUserSimilarity);
+
+// Get all users with their favorites
+app.get('/api/users/all', authRoutes.isAuthenticated, authRoutes.getAllUsersWithFavorites);
 
 // Public data
 app.get('/api/artists', authRoutes.getAllArtists);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaMusic, FaUser, FaArrowLeft, FaPlus, FaTimes } from "react-icons/fa";
+import { FaMusic, FaUser, FaArrowLeft, FaPlus, FaTimes, FaSignOutAlt } from "react-icons/fa";
 
-const Profile = () => {
+const Profile = ({ onLogout }) => {
   const navigate = useNavigate();
 
   // User
@@ -23,6 +23,15 @@ const Profile = () => {
   const [showAddSong, setShowAddSong] = useState(false);
   const [selectedArtistId, setSelectedArtistId] = useState("");
   const [selectedSongId, setSelectedSongId] = useState("");
+
+  // Change password UI
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [filteredSongs, setFilteredSongs] = useState([]);
@@ -299,6 +308,110 @@ const Profile = () => {
   };
 
   // ----------------------------------
+  // LOGOUT
+  // ----------------------------------
+  const handleLogout = () => {
+    // Call the logout function passed from App component
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  // ----------------------------------
+  // CHANGE PASSWORD
+  // ----------------------------------
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+    
+    // Validation
+    if (!currentPassword) {
+      setPasswordError("Current password is required");
+      return;
+    }
+    
+    if (!newPassword) {
+      setPasswordError("New password is required");
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long");
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    
+    if (currentPassword === newPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
+    
+    try {
+      setIsChangingPassword(true);
+      
+      // First, verify current password by attempting to login
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: user.email,
+          password: currentPassword
+        })
+      });
+      
+      const loginResult = await loginResponse.json();
+      
+      if (!loginResult.success) {
+        setPasswordError("Current password is incorrect");
+        return;
+      }
+      
+      // If current password is correct, update to new password
+      const response = await fetch('/api/auth/set-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          userId: user.id,
+          password: newPassword
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setPasswordSuccess("Password changed successfully!");
+        // Clear form fields
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        // Hide the change password form after a delay
+        setTimeout(() => {
+          setShowChangePassword(false);
+          setPasswordSuccess("");
+        }, 2000);
+      } else {
+        setPasswordError(result.message || "Failed to change password");
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError("An error occurred while changing password");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  // ----------------------------------
   // LOADING SCREEN
   // ----------------------------------
   if (loading)
@@ -321,15 +434,144 @@ const Profile = () => {
       </button>
 
       {/* USER HEADER */}
-      <div className="bg-gray-900 p-6 rounded-xl mb-6 flex items-center gap-6">
-        <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-4xl font-bold">
-          {user.name?.charAt(0).toUpperCase()}
+      <div className="bg-gray-900 p-6 rounded-[5px] mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-4xl font-bold">
+            {user.name?.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">{user.name}</h1>
+            <p className="text-gray-400">{user.email}</p>
+            {user.listening_minutes !== undefined && user.listening_minutes !== null && (
+              <p className="text-gray-400 mt-1">
+                November Listening Time: {user.listening_minutes} minutes
+              </p>
+            )}
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold">{user.name}</h1>
-          <p className="text-gray-400">{user.email}</p>
-        </div>
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+        >
+          <FaSignOutAlt />
+          <span>Logout</span>
+        </button>
       </div>
+
+      {/* Change Password Form */}
+      {showChangePassword && (
+        <div className="bg-gray-900 p-6 rounded-xl mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Change Password</h2>
+            <button 
+              onClick={() => {
+                setShowChangePassword(false);
+                setPasswordError("");
+                setPasswordSuccess("");
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+              className="text-gray-400 hover:text-white"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          
+          {passwordSuccess && (
+            <div className="bg-green-900/30 border border-green-700 text-green-200 p-3 rounded-lg mb-4">
+              {passwordSuccess}
+            </div>
+          )}
+          
+          {passwordError && (
+            <div className="bg-red-900/30 border border-red-700 text-red-200 p-3 rounded-lg mb-4">
+              {passwordError}
+            </div>
+          )}
+          
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2" htmlFor="currentPassword">
+                Current Password
+              </label>
+              <input
+                type="password"
+                id="currentPassword"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                placeholder="Enter current password"
+                disabled={isChangingPassword}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2" htmlFor="newPassword">
+                New Password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                placeholder="Enter new password (min 6 characters)"
+                disabled={isChangingPassword}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2" htmlFor="confirmPassword">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                placeholder="Confirm new password"
+                disabled={isChangingPassword}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowChangePassword(false);
+                  setPasswordError("");
+                  setPasswordSuccess("");
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                }}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                disabled={isChangingPassword}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isChangingPassword}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-lg transition-colors flex items-center"
+              >
+                {isChangingPassword ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                    Changing...
+                  </>
+                ) : (
+                  "Change Password"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -338,58 +580,29 @@ const Profile = () => {
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center">
               <FaUser className="text-green-400 mr-2" />
-              Favorite Artists
+              Favorite Artists (from Spotify)
             </h2>
-
-            <button
-              className="bg-gray-800 px-3 py-1 rounded-full flex items-center"
-              onClick={() => setShowAddArtist(!showAddArtist)}
-            >
-              <FaPlus size={12} className="mr-1" /> Add
-            </button>
           </div>
-
-          {showAddArtist && (
-            <div className="bg-gray-800 p-3 rounded-lg mb-4">
-              <select
-                className="w-full p-2 bg-gray-700 rounded mb-2 text-white"
-                value={selectedArtistId}
-                onChange={(e) => setSelectedArtistId(e.target.value)}
-                autoFocus
-              >
-                <option value="">Select an artist</option>
-                {availableArtists.map((artist) => (
-                  <option key={artist.id} value={artist.id}>
-                    {artist.artist_name}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                disabled={!selectedArtistId}
-                onClick={handleAddArtist}
-                className="bg-green-600 px-3 py-1 rounded mt-2 float-right disabled:opacity-50"
-              >
-                Add
-              </button>
-            </div>
-          )}
 
           {/* LIST */}
           <ul className="space-y-2">
-            {favorites.artists.map((a) => (
-              <li
-                key={a.id}
-                className="bg-gray-800 p-3 rounded flex justify-between items-center"
-              >
-                {a.artist_name}
-                <FaTimes
-                  onClick={() => removeFavorite(a, "artist")}
-                  className="text-red-400 cursor-pointer hover:text-red-300"
-                />
+            {favorites.artists.length > 0 ? (
+              favorites.artists.map((a) => (
+                <li
+                  key={a.id}
+                  className="bg-gray-800 p-3 rounded flex justify-between items-center"
+                >
+                  {a.artist_name}
+                </li>
+              ))
+            ) : (
+              <li className="bg-gray-800 p-3 rounded text-gray-400 text-center">
+                No favorite artists found. Login with Spotify to import your favorites.
               </li>
-            ))}
+            )}
           </ul>
+          
+          
         </div>
 
         {/* FAVORITE SONGS */}
@@ -397,74 +610,9 @@ const Profile = () => {
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center">
               <FaMusic className="text-green-400 mr-2" />
-              Favorite Songs
+              Favorite Songs (from Spotify)
             </h2>
-
-            <button
-              className="bg-gray-800 px-3 py-1 rounded-full flex items-center"
-              onClick={() => setShowAddSong(!showAddSong)}
-            >
-              <FaPlus size={12} className="mr-1" /> Add
-            </button>
           </div>
-
-          {showAddSong && (
-            <div className="bg-gray-800 p-3 rounded-lg mb-4">
-              <div className="mb-2">
-                <div className="mb-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Select a song to add to favorites:
-                  </label>
-                  <select
-                    className="w-full p-2 bg-gray-700 rounded text-white border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    value={selectedSongId}
-                    onChange={(e) => {
-                      console.log('Selected song ID:', e.target.value);
-                      setSelectedSongId(e.target.value);
-                    }}
-                    disabled={loadingSongs || availableSongs.length === 0}
-                    autoFocus
-                  >
-                    <option value="">
-                      {loadingSongs ? 'Loading songs...' : 
-                       availableSongs.length === 0 ? 'No songs available' : 
-                       '-- Select a song --'}
-                    </option>
-                    {availableSongs.map((song) => (
-                      <option 
-                        key={`song-${song.id}`} 
-                        value={song.id}
-                        className="bg-gray-800 text-white"
-                      >
-                        {song.song_name} - {song.artist_name || 'Unknown Artist'}
-                      </option>
-                    ))}
-                  </select>
-                  {!loadingSongs && availableSongs.length > 0 && (
-                    <p className="mt-1 text-xs text-gray-400">
-                      {availableSongs.length} songs available
-                    </p>
-                  )}
-                </div>
-                {loadingSongs && (
-                  <p className="text-sm text-gray-400 mt-1">Loading songs...</p>
-                )}
-                {!loadingSongs && availableSongs.length === 0 && (
-                  <p className="text-sm text-yellow-400 mt-1">
-                    {allSongs.length > 0 ? 'All songs have been added to favorites' : 'No songs available'}
-                  </p>
-                )}
-              </div>
-
-              <button
-                disabled={!selectedSongId}
-                onClick={handleAddSong}
-                className="bg-green-600 px-3 py-1 rounded mt-2 float-right disabled:opacity-50"
-              >
-                Add
-              </button>
-            </div>
-          )}
 
           {/* LIST */}
           <ul className="space-y-2">
@@ -474,21 +622,24 @@ const Profile = () => {
                 className="bg-gray-800 p-3 rounded"
               >
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex items-center space-x-2">
                     <div className="font-medium">{s.song_name}</div>
-                    <div className="text-sm text-gray-400">{s.artist_name}</div>
+                    <div className="text-sm text-gray-400"> By {s.artist_name}</div>
                   </div>
-
-                  <FaTimes
-                    onClick={() => removeFavorite(s, "song")}
-                    className="text-red-400 cursor-pointer hover:text-red-300"
-                  />
                 </div>
               </li>
             ))}
           </ul>
         </div>
-
+      </div>
+      {/* Change Password Button */}
+      <div className="mt-6">
+        <button
+          onClick={() => setShowChangePassword(true)}
+          className="w-full py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center"
+        >
+          Change Password
+        </button>
       </div>
     </div>
   );

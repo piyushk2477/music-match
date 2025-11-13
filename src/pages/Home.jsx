@@ -1,190 +1,101 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
-
-const dummyUsers = [
-  {
-    id: 1,
-    name: "Arjun Sharma",
-    image: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    id: 2,
-    name: "Priya Verma",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-  },
-  {
-    id: 3,
-    name: "Rohit Singh",
-    image: "https://randomuser.me/api/portraits/men/34.jpg",
-  },
-  {
-    id: 4,
-    name: "Aditi Mehra",
-    image: "https://randomuser.me/api/portraits/women/22.jpg",
-  },
-  {
-    id: 5,
-    name: "Vikram Patel",
-    image: "https://randomuser.me/api/portraits/men/77.jpg",
-  },
-];
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Home = ({ onLogout }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Get user data from localStorage
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
     }
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      // Call the backend logout endpoint
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include', // Important for sending cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Logout failed');
-      }
-
-      // Clear local storage and redirect to login
-      localStorage.removeItem('user');
-      onLogout(); // Call the parent's logout handler
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if there's an error with the API, still clear local storage and redirect
-      localStorage.removeItem('user');
-      onLogout();
-      navigate('/login');
-    }
-  };
+  if (!user) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-black flex items-center justify-center text-white"
+      >
+        Loading...
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="bg-black text-white min-h-screen overflow-x-hidden">
-      {/* Profile Dropdown */}
-      <div className="absolute top-4 right-4 z-50">
-        <div className="relative">
-          <div className="relative">
-            <button 
-              onClick={() => navigate('/profile')}
-              className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-full px-4 py-2 transition-colors"
-            >
-              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
-                <FaUser className="text-white" />
-              </div>
-              <span className="font-medium">{user?.name || 'Profile'}</span>
-            </button>
-          </div>
-          
-          {true && (
-            <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-              <div className="p-4 border-b border-gray-700">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
-                    <FaUser className="text-xl text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{user?.name || 'User'}</h3>
-                    <p className="text-sm text-gray-400">{user?.email || 'user@example.com'}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-2">
-                <button 
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-left text-red-400 hover:bg-gray-700 rounded-md transition-colors"
-                >
-                  <FaSignOutAlt />
-                  <span>Sign out</span>
-                </button>
-              </div>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-black text-white p-6 relative overflow-hidden"
+    >
+      {/* Background gradient & blur */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-black to-gray-900 opacity-70 z-0"></div>
+      <div className="absolute w-[600px] h-[600px] bg-green-500 blur-[160px] opacity-30 animate-pulse rounded-full -top-20 -left-20 z-0"></div>
+      <div className="absolute w-[500px] h-[500px] bg-purple-600 blur-[160px] opacity-30 animate-pulse rounded-full bottom-10 right-10 z-0"></div>
+      
+      {/* Navbar with Music Match name at rightmost side */}
+      <div className="fixed top-6 left-6 right-6 flex justify-between items-center z-50">
+        <div className="text-3xl font-bold text-white">
+          Music Match
+        </div>
+        <div className="flex items-center space-x-4">
+          {/* User Profile Capsule */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+            onClick={() => navigate('/profile')}
+            className="bg-gray-800 rounded-2xl py-2 px-6 flex items-center space-x-3 cursor-pointer hover:bg-gray-700 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
-          )}
+            <div className="flex flex-col">
+              <span className="font-semibold">{user.name}</span>
+              <span className="text-xs text-gray-400">{user.email}</span>
+            </div>
+          </motion.div>
         </div>
       </div>
-      {/* Hero Section */}
-      <section className="relative h-screen flex flex-col items-center justify-center text-center px-6">
-        {/* Background gradient & blur */}
-        <div className="absolute inset-0 from-green-600 via-black to-gray-900 opacity-90"></div>
-        <div className="absolute w-[600px] h-[600px] bg-green-500 blur-[160px] opacity-20 animate-pulse rounded-full -top-20 -left-20"></div>
-        <div className="absolute w-[500px] h-[500px] bg-purple-600 blur-[160px] opacity-20 animate-pulse rounded-full bottom-10 right-10"></div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-2xl">
-          <h1 className="text-6xl font-extrabold mb-6 leading-tight">
-            Feel the <span className="text-green-400">Beat</span>.  
-            Find your <span className="text-green-400">Vibe</span>.
-          </h1>
-          <p className="text-gray-300 text-lg mb-10">
-            Explore people who share your taste in music.  
-            Discover songs, connect, and vibe together.
-          </p>
-          <a
-            href="#users"
-            className="bg-green-500 hover:bg-green-600 transition-all text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-green-500/40"
-          >
-            Meet Music Lovers ↓
-          </a>
-          <button
-  onClick={() => navigate('/ranking')}
-  className="ml-4 bg-gray-800 hover:bg-gray-700 transition-all text-white font-semibold py-3 px-8 rounded-full shadow-lg cursor-pointer"
->
-  View Rankings 🏆
-</button>
-
-        </div>
-      </section>
-
-      {/* Users Section */}
-      <section id="users" className="max-w-6xl mx-auto px-6 py-24">
-        <h2 className="text-4xl font-bold mb-12 text-center text-green-400">
-          Popular Listeners
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-          {dummyUsers.map((user) => (
-            <div
-              key={user.id}
-              onClick={() => onUserSelect(user)}
-              className="relative group bg-gray-900 rounded-2xl text-center overflow-hidden shadow-xl hover:shadow-green-500/30 cursor-pointer transform hover:-translate-y-2 transition-all duration-300"
-            >
-              <div className="absolute inset-0 from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-              <img
-                src={user.image}
-                alt={user.name}
-                className="w-full h-72 object-cover"
-              />
-              <div className="absolute bottom-5 left-0 right-0 z-10">
-                <h3 className="text-xl font-semibold">{user.name}</h3>
-                <p className="text-sm text-gray-300">Tap to view profile</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-24 text-center text-gray-400 max-w-3xl mx-auto">
-          <h3 className="text-2xl font-semibold mb-3 text-white">
-            🎵 Connect • Discover • Match
-          </h3>
-          <p>
-            Music Match helps you explore listeners who vibe with your rhythm.  
-            Check out profiles, top songs, and favorite artists — and see how your music connects.
-          </p>
-        </div>
-      </section>
-    </div>
+      
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 pt-16">
+        <motion.h1 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-5xl md:text-7xl font-extrabold mb-6 text-white text-center tracking-wide font-serif"
+        >
+          Feel the Beat, Find Your Vibe
+        </motion.h1>
+        <motion.p 
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto text-center mb-8"
+        >
+          "Where melodies meet and souls connect through the universal language of music."
+        </motion.p>
+        
+        {/* View Ranking Button (under heading and subheading) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          onClick={() => navigate('/ranking')}
+          className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
+        >
+          <div className="flex flex-col">
+            <span className="text-xl font-semibold">View Rankings</span>
+          </div>
+          <div className="text-2xl">→</div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 };
 
