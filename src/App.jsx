@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import Ranking from "./pages/Ranking";
 import Compare from "./pages/Compare";
 import AuthCallback from "./pages/AuthCallback";
+import Discover from "./pages/Discover";
 
 // A wrapper to handle authentication
 const PrivateRoute = ({ children }) => {
@@ -155,6 +156,15 @@ const AppRoutes = () => {
         element={
           <PrivateRoute>
             <Compare onBack={() => navigate('/ranking')} />
+          </PrivateRoute>
+        } 
+      />
+      
+      <Route 
+        path="/discover" 
+        element={
+          <PrivateRoute>
+            <Discover onBack={() => navigate('/home')} />
           </PrivateRoute>
         } 
       />

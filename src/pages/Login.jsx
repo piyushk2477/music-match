@@ -81,7 +81,7 @@ const Login = ({ onLogin, isAuthenticated }) => {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={handleSpotifyLogin}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/50"
+              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg"
             >
               <motion.svg 
                 initial={{ rotate: -10 }}

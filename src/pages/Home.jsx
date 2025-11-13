@@ -81,19 +81,36 @@ const Home = ({ onLogout }) => {
           "Where melodies meet and souls connect through the universal language of music."
         </motion.p>
         
-        {/* View Ranking Button (under heading and subheading) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          onClick={() => navigate('/ranking')}
-          className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
-        >
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold">View Rankings</span>
-          </div>
-          <div className="text-2xl">→</div>
-        </motion.div>
+        {/* Buttons Container */}
+        <div className="flex space-x-6">
+          {/* Discover People Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            onClick={() => navigate('/discover')}
+            className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
+          >
+            <div className="flex flex-col">
+              <span className="text-xl font-semibold">Discover People</span>
+            </div>
+            <div className="text-2xl">→</div>
+          </motion.div>
+          
+          {/* View Ranking Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            onClick={() => navigate('/ranking')}
+            className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
+          >
+            <div className="flex flex-col">
+              <span className="text-xl font-semibold">View Rankings</span>
+            </div>
+            <div className="text-2xl">→</div>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );
