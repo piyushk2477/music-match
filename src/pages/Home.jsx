@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaSignOutAlt } from "react-icons/fa";
 
 const dummyUsers = [
   {
@@ -28,13 +30,93 @@ const dummyUsers = [
   },
 ];
 
-const Home = ({ onUserSelect }) => {
+const Home = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // Call the backend logout endpoint
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Important for sending cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
+      // Clear local storage and redirect to login
+      localStorage.removeItem('user');
+      onLogout(); // Call the parent's logout handler
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if there's an error with the API, still clear local storage and redirect
+      localStorage.removeItem('user');
+      onLogout();
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="bg-black text-white min-h-screen overflow-x-hidden">
+      {/* Profile Dropdown */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="relative">
+          <div className="relative">
+            <button 
+              onClick={() => navigate('/profile')}
+              className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-full px-4 py-2 transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                <FaUser className="text-white" />
+              </div>
+              <span className="font-medium">{user?.name || 'Profile'}</span>
+            </button>
+          </div>
+          
+          {true && (
+            <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+              <div className="p-4 border-b border-gray-700">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
+                    <FaUser className="text-xl text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{user?.name || 'User'}</h3>
+                    <p className="text-sm text-gray-400">{user?.email || 'user@example.com'}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-2">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 px-4 py-2 text-left text-red-400 hover:bg-gray-700 rounded-md transition-colors"
+                >
+                  <FaSignOutAlt />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       {/* Hero Section */}
       <section className="relative h-screen flex flex-col items-center justify-center text-center px-6">
         {/* Background gradient & blur */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-black to-gray-900 opacity-90"></div>
+        <div className="absolute inset-0 from-green-600 via-black to-gray-900 opacity-90"></div>
         <div className="absolute w-[600px] h-[600px] bg-green-500 blur-[160px] opacity-20 animate-pulse rounded-full -top-20 -left-20"></div>
         <div className="absolute w-[500px] h-[500px] bg-purple-600 blur-[160px] opacity-20 animate-pulse rounded-full bottom-10 right-10"></div>
 
@@ -54,12 +136,12 @@ const Home = ({ onUserSelect }) => {
           >
             Meet Music Lovers ↓
           </a>
-          <a
-  onClick={() => onUserSelect("ranking")}
+          <button
+  onClick={() => navigate('/ranking')}
   className="ml-4 bg-gray-800 hover:bg-gray-700 transition-all text-white font-semibold py-3 px-8 rounded-full shadow-lg cursor-pointer"
 >
   View Rankings 🏆
-</a>
+</button>
 
         </div>
       </section>
@@ -77,7 +159,7 @@ const Home = ({ onUserSelect }) => {
               onClick={() => onUserSelect(user)}
               className="relative group bg-gray-900 rounded-2xl text-center overflow-hidden shadow-xl hover:shadow-green-500/30 cursor-pointer transform hover:-translate-y-2 transition-all duration-300"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="absolute inset-0 from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
               <img
                 src={user.image}
                 alt={user.name}
