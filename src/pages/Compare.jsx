@@ -150,7 +150,7 @@ const Compare = ({ onBack }) => {
       </button>
 
       <h1 className="text-4xl font-extrabold mb-10 text-green-400 text-center">
-        🎧 Music Taste Comparison
+        Music Taste Comparison
       </h1>
 
       {/* Similarity Score */}
@@ -173,7 +173,7 @@ const Compare = ({ onBack }) => {
           </div>
           <h2 className="text-2xl font-bold mb-2">{currentUserData.name}</h2>
           <p className="text-gray-400 mb-6">
-            🎵 Minutes Listened:{" "}
+            Minutes Listened:{" "}
             <span className="text-green-400 font-semibold">
               {currentUserData.listening_minutes?.toLocaleString() || 0}
             </span>
@@ -228,7 +228,7 @@ const Compare = ({ onBack }) => {
           </div>
           <h2 className="text-2xl font-bold mb-2">{selectedUser.userName}</h2>
           <p className="text-gray-400 mb-6">
-            🎵 Minutes Listened:{" "}
+            Minutes Listened:{" "}
             <span className="text-green-400 font-semibold">
               {selectedUser.listeningMinutes?.toLocaleString() || 0}
             </span>

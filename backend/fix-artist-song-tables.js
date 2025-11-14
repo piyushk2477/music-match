@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 
 async function fixArtistSongTables() {
   try {
-    console.log('🔧 Adding spotify_id columns to artists and songs tables...');
+    console.log('Adding spotify_id columns to artists and songs tables...');
     
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -18,7 +18,7 @@ async function fixArtistSongTables() {
         ALTER TABLE artists 
         ADD COLUMN spotify_id VARCHAR(255) UNIQUE
       `);
-      console.log('✅ Added spotify_id column to artists table');
+      console.log('Added spotify_id column to artists table');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  spotify_id column already exists in artists table');
@@ -33,7 +33,7 @@ async function fixArtistSongTables() {
         ALTER TABLE songs 
         ADD COLUMN spotify_id VARCHAR(255) UNIQUE
       `);
-      console.log('✅ Added spotify_id column to songs table');
+      console.log('Added spotify_id column to songs table');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  spotify_id column already exists in songs table');
@@ -43,11 +43,11 @@ async function fixArtistSongTables() {
     }
 
     await connection.end();
-    console.log('\n🎉 Tables updated successfully!');
+    console.log('\nTables updated successfully!');
     console.log('Try Spotify login again - it should work now!\n');
     
   } catch (error) {
-    console.error('❌ Failed to update tables:');
+    console.error('Failed to update tables:');
     console.error('Error:', error.message);
     process.exit(1);
   }

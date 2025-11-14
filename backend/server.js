@@ -140,13 +140,13 @@ app.get('/callback',
           listening_minutes: listeningMinutes
         };
         
-        console.log('✅ Session created:', {
+        console.log('Session created:', {
           sessionId: req.sessionID,
           userId: user.id,
           userName: user.name
         });
         
-        console.log('✅ Spotify authentication successful for user:', user.id);
+        console.log('Spotify authentication successful for user:', user.id);
         console.log('FRONTEND_URL from env:', process.env.FRONTEND_URL);
         const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
         const redirectUrl = `${frontendUrl}/auth/callback?success=true`;
@@ -233,8 +233,8 @@ app.use((err, req, res, next) => {
 
 // Start server
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`\nServer is running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`⏱️  ${new Date().toISOString()}`);
   console.log('\nAvailable endpoints:');
   console.log(`- GET  /api/health`);
@@ -247,7 +247,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 // Handle server errors
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`❌ Port ${PORT} is already in use`);
+    console.error(`Port ${PORT} is already in use`);
   } else {
     console.error('Server error:', error);
   }

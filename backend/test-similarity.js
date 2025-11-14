@@ -2,7 +2,7 @@ const pool = require('./db');
 
 async function testSimilarity() {
   try {
-    console.log('🔧 Testing similarity calculation...');
+    console.log('Testing similarity calculation...');
     
     // Get all users
     const [allUsers] = await pool.query('SELECT id, name, email, listening_minutes FROM users ORDER BY id');
@@ -46,10 +46,10 @@ async function testSimilarity() {
       }
     }
     
-    console.log('\n✅ Test completed!');
+    console.log('\nTest completed!');
     
   } catch (error) {
-    console.error('❌ Error testing similarity:', error.message);
+    console.error('Error testing similarity:', error.message);
     console.error('Stack:', error.stack);
   } finally {
     await pool.end();

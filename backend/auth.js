@@ -2,14 +2,14 @@ const pool = require('./db');
 
 // User login (POST with request body)
 const loginUser = async (req, res) => {
-  console.log('\n🔑 Login request received:', {
+  console.log('\nLogin request received:', {
     body: req.body,
     headers: req.headers
   });
 
   // Input validation with better error messages
   if (!req.body.username && !req.body.email) {
-    console.log('❌ No username or email provided');
+    console.log('No username or email provided');
     return res.status(400).json({ 
       success: false, 
       message: 'Email is required' 
@@ -17,7 +17,7 @@ const loginUser = async (req, res) => {
   }
 
   if (!req.body.password) {
-    console.log('❌ No password provided');
+    console.log('No password provided');
     return res.status(400).json({ 
       success: false, 
       message: 'Password is required' 
@@ -27,7 +27,7 @@ const loginUser = async (req, res) => {
   const { username, email = username, password } = req.body;
 
   try {
-    console.log('🔍 Querying database for user:', username);
+    console.log('Querying database for user:', username);
     
     // Get database connection
     const connection = await pool.getConnection();
@@ -39,15 +39,15 @@ const loginUser = async (req, res) => {
         [email]
       );
       
-      console.log('🔍 Database query results:', { 
+      console.log('Database query results:', { 
         userCount: users.length,
         emailUsed: email
       });
       
-      console.log('📊 Database query results:', { userCount: users.length });
+      console.log('Database query results:', { userCount: users.length });
 
       if (users.length === 0) {
-        console.log('❌ No user found with email:', username);
+        console.log('No user found with email:', username);
         return res.status(401).json({ 
           success: false, 
           message: 'Invalid email or password',
@@ -56,7 +56,7 @@ const loginUser = async (req, res) => {
       }
 
       const user = users[0];
-      console.log('👤 User found:', { 
+      console.log('User found:', { 
         id: user.id, 
         name: user.name,
         email: user.email,
@@ -67,7 +67,7 @@ const loginUser = async (req, res) => {
       // In production, always use bcrypt.compare()
       const isPasswordValid = user.password === password;
       
-      console.log('🔑 Password comparison -', {
+      console.log('Password comparison -', {
         inputLength: password ? password.length : 0,
         isPasswordValid,
         storedLength: user.password ? user.password.length : 0,
@@ -75,7 +75,7 @@ const loginUser = async (req, res) => {
       });
       
       if (!isPasswordValid) {
-        console.log('❌ Invalid password for user:', user.email);
+        console.log('Invalid password for user:', user.email);
         return res.status(401).json({ 
           success: false, 
           message: 'Invalid email or password',
@@ -88,7 +88,7 @@ const loginUser = async (req, res) => {
       
       // Set user in session
       req.session.user = userWithoutPassword;
-      console.log('✅ Login successful for user:', username);
+      console.log('Login successful for user:', username);
       
       // Send response
       res.json({ 
@@ -103,7 +103,7 @@ const loginUser = async (req, res) => {
     }
     
   } catch (error) {
-    console.error('🔥 Login error:', {
+    console.error('Login error:', {
       message: error.message,
       code: error.code,
       sql: error.sql,
@@ -123,7 +123,7 @@ const loginUser = async (req, res) => {
 
 // Get current user from session
 const getCurrentUser = async (req, res) => {
-  console.log('\n👤 Current session check:', {
+  console.log('\nCurrent session check:', {
     sessionId: req.sessionID,
     hasUser: !!req.session.user,
     userId: req.session.user?.id
@@ -158,7 +158,7 @@ const getCurrentUser = async (req, res) => {
       });
     }
   } else {
-    console.log('❌ No active session found');
+    console.log('No active session found');
     res.status(401).json({ 
       success: false, 
       message: 'Not authenticated' 
@@ -169,11 +169,11 @@ const getCurrentUser = async (req, res) => {
 // Logout user
 const logoutUser = (req, res) => {
   const userId = req.session.user?.id;
-  console.log('\n🚪 Logout requested for user ID:', userId);
+  console.log('\nLogout requested for user ID:', userId);
   
   req.session.destroy(err => {
     if (err) {
-      console.error('❌ Logout error:', err);
+      console.error('Logout error:', err);
       return res.status(500).json({ 
         success: false, 
         message: 'Error during logout' 
@@ -181,7 +181,7 @@ const logoutUser = (req, res) => {
     }
     
     res.clearCookie('connect.sid');
-    console.log('✅ User logged out successfully');
+    console.log('User logged out successfully');
     res.json({ 
       success: true, 
       message: 'Logged out successfully' 
@@ -192,11 +192,11 @@ const logoutUser = (req, res) => {
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
-    console.log('🔒 Authenticated request from user:', req.session.user.username);
+    console.log('Authenticated request from user:', req.session.user.username);
     return next();
   }
   
-  console.log('🔒 Unauthorized access attempt');
+  console.log('Unauthorized access attempt');
   res.status(401).json({ 
     success: false, 
     message: 'Authentication required' 
@@ -442,7 +442,7 @@ const getUserSimilarity = async (req, res) => {
       });
     }
 
-    console.log('🔍 Calculating similarity for user:', currentUserId);
+    console.log('Calculating similarity for user:', currentUserId);
 
     // Get all users except current user
     const [allUsers] = await pool.query(
@@ -480,7 +480,7 @@ const getUserSimilarity = async (req, res) => {
       [currentUserId]
     );
 
-    console.log(`📊 Comparing with ${allUsers.length} other users`);
+    console.log(`Comparing with ${allUsers.length} other users`);
 
     // Group favorites by user ID for faster lookup
     const userSongsMap = {};
@@ -560,7 +560,7 @@ const getUserSimilarity = async (req, res) => {
       return b.listeningMinutes - a.listeningMinutes; // Higher listening minutes first if similarity is the same
     });
 
-    console.log(`✅ Found ${similarities.length} similar users`);
+    console.log(` Found ${similarities.length} similar users`);
     console.log('Similarities data:', similarities);
 
     res.json({
@@ -579,7 +579,7 @@ const getUserSimilarity = async (req, res) => {
 // Get all users with their top 5 songs and top 5 artists
 const getAllUsersWithFavorites = async (req, res) => {
   try {
-    console.log('📋 Fetching all users with their favorites...');
+    console.log('Fetching all users with their favorites...');
     
     // Get sorting parameter from query
     const sortBy = req.query.sortBy || 'name'; // Default to sorting by name
@@ -598,7 +598,7 @@ const getAllUsersWithFavorites = async (req, res) => {
     const sortColumn = validSortBy.includes(sortBy) ? columnMap[sortBy] : 'name';
     const order = validSortOrder.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'ASC';
     
-    console.log(`🔍 Sorting users by ${sortColumn} ${order}`);
+    console.log(`Sorting users by ${sortColumn} ${order}`);
     
     // Get all users with sorting
     // Build the ORDER BY clause manually since we can't parameterize ASC/DESC
@@ -607,7 +607,7 @@ const getAllUsersWithFavorites = async (req, res) => {
       `SELECT id, name, email, listening_minutes FROM users ORDER BY ${orderByClause}`
     );
 
-    console.log(`✅ Found ${users.length} users`);
+    console.log(`Found ${users.length} users`);
 
     // For each user, get their favorite songs and artists using subqueries
     const usersWithFavorites = await Promise.all(
@@ -640,7 +640,7 @@ const getAllUsersWithFavorites = async (req, res) => {
       })
     );
 
-    console.log('✅ Successfully fetched all users with favorites');
+    console.log('Successfully fetched all users with favorites');
 
     res.json({
       success: true,

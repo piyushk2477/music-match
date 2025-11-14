@@ -14,7 +14,7 @@ const dbConfig = {
   multipleStatements: true
 };
 
-console.log('🔌 Database connection details:', {
+console.log('Database connection details:', {
   host: dbConfig.host,
   user: dbConfig.user,
   database: dbConfig.database,
@@ -27,30 +27,30 @@ const pool = mysql.createPool(dbConfig);
 async function testConnection() {
   let connection;
   try {
-    console.log('🔍 Attempting to connect to the database...');
+    console.log('Attempting to connect to the database...');
     
     // Get a connection from the pool
     connection = await pool.getConnection();
-    console.log('✅ Successfully connected to the database!');
+    console.log('Successfully connected to the database!');
     
     // Check if the database exists
     const [dbs] = await connection.query('SHOW DATABASES');
-    console.log('📊 Available databases:', dbs.map(db => db.Database));
+    console.log('Available databases:', dbs.map(db => db.Database));
     
     const dbExists = dbs.some(db => db.Database === dbConfig.database);
     
     if (!dbExists) {
-      console.warn(`⚠️  Database '${dbConfig.database}' does not exist.`);
-      console.log('🔧 Attempting to create database...');
+      console.warn(`Database '${dbConfig.database}' does not exist.`);
+      console.log('Attempting to create database...');
       await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
-      console.log(`✅ Database '${dbConfig.database}' created successfully.`);
+      console.log(`Database '${dbConfig.database}' created successfully.`);
     }
     
     // Select the database
     await connection.query(`USE \`${dbConfig.database}\``);
     
     // Check if users table exists and log its structure
-    console.log('🔍 Checking users table structure...');
+    console.log('Checking users table structure...');
     const [tables] = await connection.query(`
       SELECT TABLE_NAME 
       FROM information_schema.TABLES 
@@ -65,11 +65,11 @@ async function testConnection() {
         WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users'
       `, [dbConfig.database]);
       
-      console.log('📋 Users table structure:', columns);
+      console.log('Users table structure:', columns);
     }
     
     if (tables.length === 0) {
-      console.log('🔧 Creating users table...');
+      console.log('Creating users table...');
       await connection.query(`
         CREATE TABLE users (
           id INT AUTO_INCREMENT PRIMARY KEY,
@@ -79,17 +79,17 @@ async function testConnection() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log('✅ Users table created successfully');
+      console.log('Users table created successfully');
     } else {
-      console.log('✅ Users table exists');
+      console.log('Users table exists');
     }
     
     // Show some stats
     const [[{count}]] = await connection.query('SELECT COUNT(*) as count FROM users');
-    console.log(`👥 Total users in database: ${count}`);
+    console.log(`Total users in database: ${count}`);
     
   } catch (error) {
-    console.error('❌ Error connecting to MySQL database:');
+    console.error('Error connecting to MySQL database:');
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
     

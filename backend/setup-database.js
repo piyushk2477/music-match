@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 
 async function setupDatabase() {
   try {
-    console.log('🔧 Setting up database...');
+    console.log('Setting up database...');
     
     // Create connection without database selected
     const connection = await mysql.createConnection({
@@ -14,7 +14,7 @@ async function setupDatabase() {
 
     // Create database
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`);
-    console.log('✅ Database created/verified');
+    console.log('Database created/verified');
 
     // Use the database
     await connection.query(`USE ${process.env.DB_NAME}`);
@@ -34,7 +34,7 @@ async function setupDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('✅ Users table created');
+    console.log('Users table created');
 
     // Create artists table
     await connection.query(`
@@ -45,7 +45,7 @@ async function setupDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('✅ Artists table created');
+    console.log('Artists table created');
 
     // Create songs table
     await connection.query(`
@@ -58,7 +58,7 @@ async function setupDatabase() {
         FOREIGN KEY (artist_id) REFERENCES artists(id)
       )
     `);
-    console.log('✅ Songs table created');
+    console.log('Songs table created');
 
     // Create user_fav_artists table
     await connection.query(`
@@ -71,7 +71,7 @@ async function setupDatabase() {
         FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
       )
     `);
-    console.log('✅ User favorite artists table created');
+    console.log('User favorite artists table created');
 
     // Create user_fav_songs table
     await connection.query(`
@@ -84,14 +84,14 @@ async function setupDatabase() {
         FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
       )
     `);
-    console.log('✅ User favorite songs table created');
+    console.log('User favorite songs table created');
 
     await connection.end();
-    console.log('\n🎉 Database setup completed successfully!');
+    console.log('\nDatabase setup completed successfully!');
     console.log('You can now start your backend server and try Spotify login.\n');
     
   } catch (error) {
-    console.error('❌ Database setup failed:');
+    console.error('Database setup failed:');
     console.error('Error:', error.message);
     console.error('\nPlease check:');
     console.error('1. MySQL is running');

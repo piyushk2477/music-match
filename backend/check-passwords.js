@@ -2,7 +2,7 @@ const pool = require('./db');
 
 async function checkPasswordUsers() {
   try {
-    console.log('🔧 Checking users with passwords...');
+    console.log('Checking users with passwords...');
     
     // Check users with passwords
     const [rows] = await pool.query('SELECT id, name, email, password FROM users WHERE password IS NOT NULL AND password != ""');
@@ -15,10 +15,10 @@ async function checkPasswordUsers() {
       console.log(`ID: ${user.id}, Name: ${user.name}, Email: ${user.email}, Has Password: ${!!(user.password && user.password !== '')}`);
     });
     
-    console.log('\n✅ Check completed!');
+    console.log('\nCheck completed!');
     
   } catch (error) {
-    console.error('❌ Error checking passwords:', error.message);
+    console.error('Error checking passwords:', error.message);
   } finally {
     await pool.end();
   }

@@ -132,7 +132,7 @@ const Ranking = () => {
                 animate={{ scale: 1 }}
                 className="text-5xl mb-4"
               >
-                🎵
+                
               </motion.div>
               <h3 className="text-2xl font-semibold mb-2">No Rankings Available</h3>
               <p className="text-gray-500 max-w-md">

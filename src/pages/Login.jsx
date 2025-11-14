@@ -42,7 +42,7 @@ const Login = ({ onLogin, isAuthenticated }) => {
             transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             className="text-5xl font-extrabold text-green-400 mb-2"
           >
-            🎵 Music Match
+            Music Match
           </motion.h1>
           <motion.h2 
             initial={{ y: 10, opacity: 0 }}
@@ -112,27 +112,6 @@ const Login = ({ onLogin, isAuthenticated }) => {
           transition={{ delay: 1 }}
           className="mt-8 space-y-3"
         >
-          {[1, 2, 3].map((item, index) => (
-            <motion.div 
-              key={item}
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 1.1 + index * 0.1 }}
-              className="flex items-center gap-3 text-gray-400"
-            >
-              <motion.div 
-                whileHover={{ scale: 1.1 }}
-                className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white"
-              >
-                ✓
-              </motion.div>
-              <span>
-                {item === 1 && 'Find users with similar music taste'}
-                {item === 2 && 'Discover new songs and artists'}
-                {item === 3 && 'Connect through your favorite music'}
-              </span>
-            </motion.div>
-          ))}
         </motion.div>
       </motion.div>
     </motion.div>

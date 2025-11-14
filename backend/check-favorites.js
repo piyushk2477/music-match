@@ -2,7 +2,7 @@ const pool = require('./db');
 
 async function checkFavorites() {
   try {
-    console.log('🔧 Checking favorites data...');
+    console.log('Checking favorites data...');
     
     // Check favorite songs count
     const [songRows] = await pool.query('SELECT COUNT(*) as count FROM user_fav_songs');
@@ -38,10 +38,10 @@ async function checkFavorites() {
       console.log(sampleArtists);
     }
     
-    console.log('\n✅ Check completed!');
+    console.log('\nCheck completed!');
     
   } catch (error) {
-    console.error('❌ Error checking favorites:', error.message);
+    console.error('Error checking favorites:', error.message);
   } finally {
     await pool.end();
   }

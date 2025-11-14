@@ -11,18 +11,18 @@ passport.serializeUser((user, done) => {
 // Deserialize user from session
 passport.deserializeUser(async (id, done) => {
   try {
-    console.log('🔍 Deserializing user with ID:', id);
+    console.log('Deserializing user with ID:', id);
     const [users] = await pool.query('SELECT id, name, email, spotify_id FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)', [id]);
     
     if (!users || users.length === 0) {
-      console.log('⚠️  No user found with ID:', id);
+      console.log('No user found with ID:', id);
       return done(null, false);
     }
     
-    console.log('✅ User deserialized:', users[0].id);
+    console.log('User deserialized:', users[0].id);
     done(null, users[0]);
   } catch (error) {
-    console.error('❌ Error deserializing user:', error.message);
+    console.error('Error deserializing user:', error.message);
     done(null, false);
   }
 });
@@ -37,7 +37,7 @@ passport.use(
     },
     async (accessToken, refreshToken, expires_in, profile, done) => {
       try {
-        console.log('✅ Spotify profile received:', {
+        console.log('Spotify profile received:', {
           id: profile.id,
           displayName: profile.displayName,
           email: profile.emails?.[0]?.value
@@ -53,7 +53,7 @@ passport.use(
         let isNewUser = false;
         if (existingUsers.length > 0) {
           // Update existing user
-          console.log('🔄 Updating existing user:', existingUsers[0].id);
+          console.log('Updating existing user:', existingUsers[0].id);
           user = existingUsers[0];
           await pool.query(
             'UPDATE users SET spotify_access_token = ?, spotify_refresh_token = ?, name = ?, email = ? WHERE id IN (SELECT id FROM (SELECT id FROM users WHERE id = ?) AS tmp)',
@@ -63,7 +63,7 @@ passport.use(
           user.spotify_refresh_token = refreshToken;
         } else {
           // Create new user
-          console.log('➕ Creating new user for Spotify ID:', profile.id);
+          console.log('Creating new user for Spotify ID:', profile.id);
           isNewUser = true;
           const [result] = await pool.query(
             'INSERT INTO users (name, email, spotify_id, spotify_access_token, spotify_refresh_token) VALUES (?, ?, ?, ?, ?)',
@@ -78,20 +78,20 @@ passport.use(
           
           const [newUser] = await pool.query('SELECT * FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)', [result.insertId]);
           user = newUser[0];
-          console.log('✅ New user created with ID:', user.id);
+          console.log('New user created with ID:', user.id);
         }
 
         // Add isNewUser flag to user object
         user.isNewUser = isNewUser;
 
         // Fetch and store user's top artists and tracks
-        console.log('🎵 Fetching Spotify data for user:', user.id);
+        console.log('Fetching Spotify data for user:', user.id);
         await fetchAndStoreSpotifyData(user.id, accessToken);
 
-        console.log('✅ Spotify authentication completed successfully');
+        console.log('Spotify authentication completed successfully');
         return done(null, user);
       } catch (error) {
-        console.error('❌ Error in Spotify strategy:');
+        console.error('Error in Spotify strategy:');
         console.error('Error name:', error.name);
         console.error('Error message:', error.message);
         console.error('Error code:', error.code);
@@ -105,14 +105,14 @@ passport.use(
 // Fetch user's top artists and tracks from Spotify
 async function fetchAndStoreSpotifyData(userId, accessToken) {
   try {
-    console.log('📡 Fetching top artists from Spotify...');
+    console.log('Fetching top artists from Spotify...');
     // Fetch top artists
     const artistsResponse = await axios.get('https://api.spotify.com/v1/me/top/artists', {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { limit: 5, time_range: 'medium_term' }
     });
 
-    console.log(`✅ Found ${artistsResponse.data.items.length} top artists`);
+    console.log(`Found ${artistsResponse.data.items.length} top artists`);
 
     // Store artists and link to user
     for (const artist of artistsResponse.data.items) {
@@ -132,7 +132,7 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
           [artist.name, artist.id]
         );
         artistId = result.insertId;
-        console.log(`➕ Added artist: ${artist.name}`);
+        console.log(`Added artist: ${artist.name}`);
       }
 
       // Link artist to user favorites
@@ -142,14 +142,14 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
       );
     }
 
-    console.log('📡 Fetching top tracks from Spotify...');
+    console.log('Fetching top tracks from Spotify...');
     // Fetch top tracks
     const tracksResponse = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { limit: 5, time_range: 'medium_term' }
     });
 
-    console.log(`✅ Found ${tracksResponse.data.items.length} top tracks`);
+    console.log(`Found ${tracksResponse.data.items.length} top tracks`);
 
     // Store tracks and link to user
     for (const track of tracksResponse.data.items) {
@@ -187,7 +187,7 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
           [track.name, artistId, track.id]
         );
         songId = result.insertId;
-        console.log(`➕ Added song: ${track.name}`);
+        console.log(`Added song: ${track.name}`);
       }
 
       // Link song to user favorites
@@ -200,9 +200,9 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
     // Fetch and store listening time
     await fetchAndStoreListeningTime(userId, accessToken);
 
-    console.log('✅ Successfully stored all Spotify data for user:', userId);
+    console.log('Successfully stored all Spotify data for user:', userId);
   } catch (error) {
-    console.error('❌ Error fetching Spotify data:');
+    console.error('Error fetching Spotify data:');
     console.error('Error message:', error.message);
     console.error('Error response:', error.response?.data);
     console.error('Error stack:', error.stack);
@@ -213,7 +213,7 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
 // Fetch user's listening time from Spotify and store in database
 async function fetchAndStoreListeningTime(userId, accessToken) {
   try {
-    console.log('📡 Fetching listening history from Spotify...');
+    console.log('Fetching listening history from Spotify...');
     
     // Calculate the start and end of November (current year)
     const now = new Date();
@@ -222,7 +222,7 @@ async function fetchAndStoreListeningTime(userId, accessToken) {
     const endOfNovember = new Date(year, 11, 0); // Month 11 = December, day 0 = last day of November
     endOfNovember.setHours(23, 59, 59, 999); // End of the day
     
-    console.log(`📅 Fetching listening data for November ${year} from ${startOfNovember.toISOString()} to ${endOfNovember.toISOString()}`);
+    console.log(`Fetching listening data for November ${year} from ${startOfNovember.toISOString()} to ${endOfNovember.toISOString()}`);
     
     // Fetch recently played tracks with pagination
     let totalMinutes = 0;
@@ -241,17 +241,17 @@ async function fetchAndStoreListeningTime(userId, accessToken) {
     while (hasMoreTracks && requestCount < maxRequests) {
       requestCount++;
       params.before = beforeTimestamp;
-      console.log(`📡 Request ${requestCount}: Fetching tracks before ${new Date(beforeTimestamp).toISOString()}`);
+      console.log(`Request ${requestCount}: Fetching tracks before ${new Date(beforeTimestamp).toISOString()}`);
       
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: params
       });
       
-      console.log(`📥 Received ${response.data.items.length} tracks in request ${requestCount}`);
+      console.log(`Received ${response.data.items.length} tracks in request ${requestCount}`);
       
       if (!response.data || !response.data.items || response.data.items.length === 0) {
-        console.log('📭 No more tracks found');
+        console.log('No more tracks found');
         hasMoreTracks = false;
         break;
       }
@@ -281,11 +281,11 @@ async function fetchAndStoreListeningTime(userId, accessToken) {
         }
       }
       
-      console.log(`📊 Request ${requestCount}: ${tracksInNovember} November tracks, ${tracksBeforeNovember} before Nov, ${tracksAfterNovember} after Nov`);
+      console.log(`Request ${requestCount}: ${tracksInNovember} November tracks, ${tracksBeforeNovember} before Nov, ${tracksAfterNovember} after Nov`);
       
       // Check if we should continue pagination
       if (response.data.items.length < 50) {
-        console.log('📭 Reached end of available tracks');
+        console.log('Reached end of available tracks');
         hasMoreTracks = false;
       } else {
         // Get the oldest track's timestamp for the next request
@@ -317,12 +317,12 @@ async function fetchAndStoreListeningTime(userId, accessToken) {
       [roundedMinutes, userId]
     );
 
-    console.log(`✅ Stored ${roundedMinutes} minutes of November listening time for user:`, userId);
-    console.log(`📈 Made ${requestCount} requests to Spotify API`);
-    console.log(`📊 Processed ${trackCount} total tracks, ${novemberTrackCount} November tracks`);
+    console.log(`Stored ${roundedMinutes} minutes of November listening time for user:`, userId);
+    console.log(`Made ${requestCount} requests to Spotify API`);
+    console.log(`Processed ${trackCount} total tracks, ${novemberTrackCount} November tracks`);
     return roundedMinutes;
   } catch (error) {
-    console.error('❌ Error fetching/storing listening time:', error.message);
+    console.error('Error fetching/storing listening time:', error.message);
     console.error('Error stack:', error.stack);
     // Even if we fail to fetch listening time, don't let it break the whole process
     return 0;

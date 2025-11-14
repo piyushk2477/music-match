@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 
 async function addSpotifyColumns() {
   try {
-    console.log('🔧 Adding Spotify columns to users table...');
+    console.log('Adding Spotify columns to users table...');
     
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -18,7 +18,7 @@ async function addSpotifyColumns() {
         ALTER TABLE users 
         ADD COLUMN spotify_id VARCHAR(255) UNIQUE AFTER password
       `);
-      console.log('✅ Added spotify_id column');
+      console.log('Added spotify_id column');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  spotify_id column already exists');
@@ -33,7 +33,7 @@ async function addSpotifyColumns() {
         ALTER TABLE users 
         ADD COLUMN spotify_access_token TEXT AFTER spotify_id
       `);
-      console.log('✅ Added spotify_access_token column');
+      console.log('Added spotify_access_token column');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  spotify_access_token column already exists');
@@ -48,7 +48,7 @@ async function addSpotifyColumns() {
         ALTER TABLE users 
         ADD COLUMN spotify_refresh_token TEXT AFTER spotify_access_token
       `);
-      console.log('✅ Added spotify_refresh_token column');
+      console.log('Added spotify_refresh_token column');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  spotify_refresh_token column already exists');
@@ -63,9 +63,9 @@ async function addSpotifyColumns() {
         ALTER TABLE users 
         MODIFY COLUMN password VARCHAR(255) NULL
       `);
-      console.log('✅ Made password column nullable');
+      console.log('Made password column nullable');
     } catch (err) {
-      console.log('⚠️  Could not modify password column:', err.message);
+      console.log('Could not modify password column:', err.message);
     }
 
     // Add username column if it doesn't exist
@@ -74,7 +74,7 @@ async function addSpotifyColumns() {
         ALTER TABLE users 
         ADD COLUMN username VARCHAR(50) AFTER name
       `);
-      console.log('✅ Added username column');
+      console.log('Added username column');
     } catch (err) {
       if (err.code === 'ER_DUP_FIELDNAME') {
         console.log('ℹ️  username column already exists');
@@ -84,11 +84,11 @@ async function addSpotifyColumns() {
     }
 
     await connection.end();
-    console.log('\n🎉 Spotify columns added successfully!');
+    console.log('\nSpotify columns added successfully!');
     console.log('Restart your backend server and try Spotify login again.\n');
     
   } catch (error) {
-    console.error('❌ Failed to add Spotify columns:');
+    console.error('Failed to add Spotify columns:');
     console.error('Error:', error.message);
     process.exit(1);
   }
