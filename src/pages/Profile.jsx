@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaMusic, FaUser, FaArrowLeft, FaPlus, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { FaMusic, FaUser, FaArrowLeft, FaPlus, FaTimes, FaSignOutAlt, FaTrash } from "react-icons/fa";
 
 const Profile = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -32,6 +32,10 @@ const Profile = ({ onLogout }) => {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Delete account UI
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [filteredSongs, setFilteredSongs] = useState([]);
@@ -412,6 +416,50 @@ const Profile = ({ onLogout }) => {
   };
 
   // ----------------------------------
+  // DELETE ACCOUNT
+  // ----------------------------------
+  const handleDeleteAccount = async () => {
+    if (!user?.id) return;
+
+    try {
+      setIsDeletingAccount(true);
+    
+      console.log('Sending DELETE request to /api/auth/account');
+      const response = await fetch('/api/auth/account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+      console.log('Received response:', response);
+
+      const result = await response.json();
+      console.log('Parsed result:', result);
+    
+      if (result.success) {
+        // Clear local storage
+        localStorage.removeItem('user');
+        // Call the logout function passed from App component
+        if (onLogout) {
+          onLogout();
+        }
+        // Redirect to login page
+        navigate('/login');
+      } else {
+        console.error('Failed to delete account:', result.message);
+        alert('Failed to delete account: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('An error occurred while deleting your account');
+    } finally {
+      setIsDeletingAccount(false);
+      setShowDeleteAccount(false);
+    }
+  };
+
+  // ----------------------------------
   // LOADING SCREEN
   // ----------------------------------
   if (loading)
@@ -573,6 +621,57 @@ const Profile = ({ onLogout }) => {
         </div>
       )}
 
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteAccount && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Delete Account</h2>
+              <button 
+                onClick={() => setShowDeleteAccount(false)}
+                className="text-gray-400 hover:text-white"
+                disabled={isDeletingAccount}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete your account? This action cannot be undone. 
+              All your data including favorite artists and songs will be permanently deleted.
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteAccount(false)}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                disabled={isDeletingAccount}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded-lg transition-colors flex items-center"
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FaTrash className="mr-2" />
+                    Delete Account
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* FAVORITE ARTISTS */}
@@ -633,12 +732,21 @@ const Profile = ({ onLogout }) => {
         </div>
       </div>
       {/* Change Password Button */}
-      <div className="mt-6">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
           onClick={() => setShowChangePassword(true)}
-          className="w-full py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center"
+          className="py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center"
         >
           Change Password
+        </button>
+        <button
+          onClick={() => setShowDeleteAccount(true)}
+          className="py-6 bg-red-900 hover:bg-red-700 rounded-lg transition-colors text-center"
+        >
+          <div className="flex items-center justify-center">
+            <FaTrash className="mr-2" />
+            Delete Account
+          </div>
         </button>
       </div>
     </div>

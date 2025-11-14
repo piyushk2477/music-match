@@ -90,6 +90,7 @@ app.post('/api/auth/login', authRoutes.loginUser);
 app.get('/api/auth/me', authRoutes.isAuthenticated, authRoutes.getCurrentUser);
 app.post('/api/auth/logout', authRoutes.logoutUser);
 app.post('/api/auth/set-password', authRoutes.isAuthenticated, authRoutes.setUserPassword);
+app.delete('/api/auth/account', authRoutes.isAuthenticated, authRoutes.deleteAccount);
 
 // Spotify OAuth Routes
 app.get('/api/auth/spotify', passport.authenticate('spotify', {
@@ -214,10 +215,15 @@ if (process.env.NODE_ENV === 'production') {
 
 // 404 handler
 app.use((req, res) => {
+  console.log(`404 Error: ${req.method} ${req.originalUrl} not found`);
+  console.log(`Request headers:`, req.headers);
+  console.log(`Request body:`, req.body);
+  
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
-    path: req.originalUrl
+    path: req.originalUrl,
+    method: req.method
   });
 });
 
@@ -241,7 +247,9 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`- GET  /api/test-db-connection`);
   console.log(`- POST /api/auth/login`);
   console.log(`- GET  /api/auth/me`);
-  console.log(`- POST /api/auth/logout\n`);
+  console.log(`- POST /api/auth/logout`);
+  console.log(`- POST /api/auth/set-password`);
+  console.log(`- DELETE /api/auth/account\n`);
 });
 
 // Handle server errors
