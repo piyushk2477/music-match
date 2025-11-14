@@ -11,6 +11,16 @@ const Home = ({ onLogout }) => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    
+    // Disable scrolling when component mounts
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    // Re-enable scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    };
   }, []);
 
   if (!user) {
@@ -31,6 +41,14 @@ const Home = ({ onLogout }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen bg-black text-white p-6 relative overflow-hidden"
+      style={{ 
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }}
     >
       {/* Background gradient & blur */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-black to-gray-900 opacity-70 z-0"></div>
@@ -63,7 +81,8 @@ const Home = ({ onLogout }) => {
       </div>
       
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 pt-16">
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 pt-16 pb-32 overflow-hidden"
+           style={{ overflow: 'hidden' }}>
         <motion.h1 
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -76,22 +95,22 @@ const Home = ({ onLogout }) => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto text-center mb-8"
+          className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto text-center mb-12"
         >
           "Where melodies meet and souls connect through the universal language of music."
         </motion.p>
         
         {/* Buttons Container */}
-        <div className="flex space-x-6">
+        <div className="flex flex-col sm:flex-row gap-6">
           {/* Discover People Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             onClick={() => navigate('/discover')}
-            className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
+            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105 min-w-[200px]"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center">
               <span className="text-xl font-semibold">Discover People</span>
             </div>
             <div className="text-2xl">→</div>
@@ -101,11 +120,11 @@ const Home = ({ onLogout }) => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
             onClick={() => navigate('/ranking')}
-            className="bg-gray-900 rounded-3xl py-3 px-7 flex items-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105"
+            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105 min-w-[200px]"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center">
               <span className="text-xl font-semibold">View Rankings</span>
             </div>
             <div className="text-2xl">→</div>

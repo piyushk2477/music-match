@@ -33,9 +33,9 @@ const loginUser = async (req, res) => {
     const connection = await pool.getConnection();
     
     try {
-      // Query for user by email
+      // Query for user by email using subquery
       const [users] = await connection.query(
-        'SELECT id, name, email, password FROM users WHERE email = ?',
+        'SELECT id, name, email, password FROM users WHERE email IN (SELECT email FROM users WHERE email = ?)',
         [email]
       );
       
@@ -131,9 +131,9 @@ const getCurrentUser = async (req, res) => {
   
   if (req.session.user) {
     try {
-      // Fetch listening minutes from database
+      // Fetch listening minutes from database using subquery
       const [users] = await pool.query(
-        'SELECT listening_minutes FROM users WHERE id = ?',
+        'SELECT listening_minutes FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)',
         [req.session.user.id]
       );
       
@@ -225,7 +225,7 @@ const testDbConnection = async (req, res) => {
 // Get all artists
 const getAllArtists = async (req, res) => {
   try {
-    const [artists] = await pool.query('SELECT * FROM artists ORDER BY artist_name');
+    const [artists] = await pool.query('SELECT * FROM artists WHERE id IN (SELECT id FROM artists) ORDER BY artist_name');
     res.json({
       success: true,
       data: artists
@@ -246,6 +246,7 @@ const getAllSongs = async (req, res) => {
       SELECT s.id, s.song_name, a.artist_name, a.id as artist_id 
       FROM songs s
       JOIN artists a ON s.artist_id = a.id
+      WHERE s.id IN (SELECT id FROM songs)
       ORDER BY s.song_name
     `);
     
@@ -276,21 +277,19 @@ const getUserFavorites = async (req, res) => {
   try {
     const connection = await pool.getConnection();
     
-    // Get favorite artists
+    // Get favorite artists using subquery
     const [artists] = await connection.query(`
-      SELECT a.id, a.artist_name 
-      FROM artists a
-      JOIN user_fav_artists ufa ON a.id = ufa.artist_id
-      WHERE ufa.user_id = ?
+      SELECT id, artist_name 
+      FROM artists 
+      WHERE id IN (SELECT artist_id FROM user_fav_artists WHERE user_id = ?)
     `, [userId]);
 
-    // Get favorite songs with artist names
+    // Get favorite songs with artist names using subquery
     const [songs] = await connection.query(`
       SELECT s.id, s.song_name, a.artist_name
       FROM songs s
       JOIN artists a ON s.artist_id = a.id
-      JOIN user_fav_songs ufs ON s.id = ufs.song_id
-      WHERE ufs.user_id = ?
+      WHERE s.id IN (SELECT song_id FROM user_fav_songs WHERE user_id = ?)
     `, [userId]);
 
     connection.release();
@@ -445,6 +444,31 @@ const getUserSimilarity = async (req, res) => {
 
     console.log('🔍 Calculating similarity for user:', currentUserId);
 
+    // Get all users except current user
+    const [allUsers] = await pool.query(
+      'SELECT id, name, email FROM users WHERE id != ? ORDER BY name',
+      [currentUserId]
+    );
+
+    // Get all favorite songs and artists for all users using subqueries
+    const userIds = allUsers.map(u => u.id);
+    
+    // Get all favorite songs for all users in one query using subquery
+    const [allUserSongs] = userIds.length > 0
+      ? await pool.query(
+          `SELECT user_id, song_id FROM user_fav_songs WHERE user_id IN (SELECT id FROM users WHERE id IN (?))`,
+          [userIds]
+        )
+      : [[], []];
+
+    // Get all favorite artists for all users in one query using subquery
+    const [allUserArtists] = userIds.length > 0
+      ? await pool.query(
+          `SELECT user_id, artist_id FROM user_fav_artists WHERE user_id IN (SELECT id FROM users WHERE id IN (?))`,
+          [userIds]
+        )
+      : [[], []];
+
     // Get current user's favorite songs and artists
     const [currentUserSongs] = await pool.query(
       `SELECT song_id FROM user_fav_songs WHERE user_id = ?`,
@@ -455,35 +479,6 @@ const getUserSimilarity = async (req, res) => {
       `SELECT artist_id FROM user_fav_artists WHERE user_id = ?`,
       [currentUserId]
     );
-
-    // Convert to sets for faster lookup
-    const currentUserSongIds = new Set(currentUserSongs.map(s => s.song_id));
-    const currentUserArtistIds = new Set(currentUserArtists.map(a => a.artist_id));
-
-    // Get all users except current user
-    const [allUsers] = await pool.query(
-      'SELECT id, name, email FROM users WHERE id != ? ORDER BY name',
-      [currentUserId]
-    );
-
-    // Get all favorite songs and artists for all users
-    const userids = allUsers.map(u => u.id);
-    
-    // Get all favorite songs for all users in one query
-    const [allUserSongs] = userids.length > 0
-      ? await pool.query(
-          `SELECT user_id, song_id FROM user_fav_songs WHERE user_id IN (?)`,
-          [userids]
-        )
-      : [[], []];
-
-    // Get all favorite artists for all users in one query
-    const [allUserArtists] = userids.length > 0
-      ? await pool.query(
-          `SELECT user_id, artist_id FROM user_fav_artists WHERE user_id IN (?)`,
-          [userids]
-        )
-      : [[], []];
 
     console.log(`📊 Comparing with ${allUsers.length} other users`);
 
@@ -511,6 +506,22 @@ const getUserSimilarity = async (req, res) => {
       }
     });
 
+    // Get all listening minutes for all users in one query
+    const userIdsForListening = allUsers.map(u => u.id);
+    let userListeningMap = {};
+    
+    if (userIdsForListening.length > 0) {
+      const [listeningResults] = await pool.query(
+        'SELECT id, listening_minutes FROM users WHERE id IN (?)',
+        [userIdsForListening]
+      );
+      
+      // Create a map for quick lookup
+      listeningResults.forEach(row => {
+        userListeningMap[row.id] = row.listening_minutes || 0;
+      });
+    }
+
     // Calculate similarity for each user
     const similarities = [];
 
@@ -519,33 +530,38 @@ const getUserSimilarity = async (req, res) => {
       const otherUserArtistIds = userArtistsMap[otherUser.id] || new Set();
 
       // Calculate Jaccard similarity for songs
-      const commonSongs = [...currentUserSongIds].filter(id => otherUserSongIds.has(id)).length;
-      const totalSongs = new Set([...currentUserSongIds, ...otherUserSongIds]).size;
+      const commonSongs = [...currentUserSongs.map(s => s.song_id)].filter(id => otherUserSongIds.has(id)).length;
+      const totalSongs = new Set([...currentUserSongs.map(s => s.song_id), ...otherUserSongIds]).size;
       const songSimilarity = totalSongs > 0 ? commonSongs / totalSongs : 0;
 
       // Calculate Jaccard similarity for artists
-      const commonArtists = [...currentUserArtistIds].filter(id => otherUserArtistIds.has(id)).length;
-      const totalArtists = new Set([...currentUserArtistIds, ...otherUserArtistIds]).size;
+      const commonArtists = [...currentUserArtists.map(a => a.artist_id)].filter(id => otherUserArtistIds.has(id)).length;
+      const totalArtists = new Set([...currentUserArtists.map(a => a.artist_id), ...otherUserArtistIds]).size;
       const artistSimilarity = totalArtists > 0 ? commonArtists / totalArtists : 0;
 
       // Combined similarity (equal weight to songs and artists)
       const similarity = (songSimilarity + artistSimilarity) / 2;
       const percentage = Math.round(similarity * 100);
 
-      if (percentage > 0) {
-        similarities.push({
-          userId: otherUser.id,
-          userName: otherUser.name,
-          email: otherUser.email,
-          score: percentage
-        });
-      }
+      similarities.push({
+        userId: otherUser.id,
+        userName: otherUser.name,
+        email: otherUser.email,
+        score: percentage,
+        listeningMinutes: userListeningMap[otherUser.id] || 0
+      });
     }
 
-    // Sort by similarity score (descending)
-    similarities.sort((a, b) => b.score - a.score);
+    // Sort by similarity score (descending), then by listening minutes (descending)
+    similarities.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score; // Higher similarity first
+      }
+      return b.listeningMinutes - a.listeningMinutes; // Higher listening minutes first if similarity is the same
+    });
 
     console.log(`✅ Found ${similarities.length} similar users`);
+    console.log('Similarities data:', similarities);
 
     res.json({
       success: true,
@@ -564,33 +580,52 @@ const getUserSimilarity = async (req, res) => {
 const getAllUsersWithFavorites = async (req, res) => {
   try {
     console.log('📋 Fetching all users with their favorites...');
-
-    // Get all users
+    
+    // Get sorting parameter from query
+    const sortBy = req.query.sortBy || 'name'; // Default to sorting by name
+    const sortOrder = req.query.sortOrder || 'ASC'; // Default to ascending
+    
+    // Validate sorting parameters
+    const validSortBy = ['name', 'listening_minutes'];
+    const validSortOrder = ['ASC', 'DESC'];
+    
+    // Map sortBy values to actual column names
+    const columnMap = {
+      'name': 'name',
+      'listening_minutes': 'listening_minutes'
+    };
+    
+    const sortColumn = validSortBy.includes(sortBy) ? columnMap[sortBy] : 'name';
+    const order = validSortOrder.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'ASC';
+    
+    console.log(`🔍 Sorting users by ${sortColumn} ${order}`);
+    
+    // Get all users with sorting
+    // Build the ORDER BY clause manually since we can't parameterize ASC/DESC
+    const orderByClause = `${sortColumn} ${order}`;
     const [users] = await pool.query(
-      'SELECT id, name, email, listening_minutes FROM users ORDER BY name'
+      `SELECT id, name, email, listening_minutes FROM users ORDER BY ${orderByClause}`
     );
 
     console.log(`✅ Found ${users.length} users`);
 
-    // For each user, get their favorite songs and artists
+    // For each user, get their favorite songs and artists using subqueries
     const usersWithFavorites = await Promise.all(
       users.map(async (user) => {
-        // Get favorite songs
+        // Get favorite songs using subquery
         const [songs] = await pool.query(
           `SELECT s.id, s.song_name, a.artist_name
            FROM songs s
            JOIN artists a ON s.artist_id = a.id
-           JOIN user_fav_songs ufs ON s.id = ufs.song_id
-           WHERE ufs.user_id = ?`,
+           WHERE s.id IN (SELECT song_id FROM user_fav_songs WHERE user_id = ?)`,
           [user.id]
         );
 
-        // Get favorite artists
+        // Get favorite artists using subquery
         const [artists] = await pool.query(
           `SELECT a.id, a.artist_name
            FROM artists a
-           JOIN user_fav_artists ufa ON a.id = ufa.artist_id
-           WHERE ufa.user_id = ?`,
+           WHERE a.id IN (SELECT artist_id FROM user_fav_artists WHERE user_id = ?)`,
           [user.id]
         );
 
@@ -643,9 +678,9 @@ const setUserPassword = async (req, res) => {
       });
     }
 
-    // Check if user exists and doesn't already have a password
+    // Check if user exists and doesn't already have a password using subquery
     const [users] = await pool.query(
-      'SELECT id, password FROM users WHERE id = ?',
+      'SELECT id, password FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)',
       [userId]
     );
 
@@ -656,9 +691,9 @@ const setUserPassword = async (req, res) => {
       });
     }
 
-    // Update user password (plain text for now, use bcrypt in production)
+    // Update user password (plain text for now, use bcrypt in production) using subquery
     await pool.query(
-      'UPDATE users SET password = ? WHERE id = ?',
+      'UPDATE users SET password = ? WHERE id IN (SELECT id FROM (SELECT id FROM users WHERE id = ?) AS tmp)',
       [password, userId]
     );
 

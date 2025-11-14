@@ -155,7 +155,7 @@ const AppRoutes = () => {
         path="/compare" 
         element={
           <PrivateRoute>
-            <Compare onBack={() => navigate('/ranking')} />
+            <Compare />
           </PrivateRoute>
         } 
       />
@@ -164,7 +164,7 @@ const AppRoutes = () => {
         path="/discover" 
         element={
           <PrivateRoute>
-            <Discover onBack={() => navigate('/home')} />
+            <Discover />
           </PrivateRoute>
         } 
       />

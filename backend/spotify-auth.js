@@ -12,7 +12,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     console.log('🔍 Deserializing user with ID:', id);
-    const [users] = await pool.query('SELECT id, name, email, spotify_id FROM users WHERE id = ?', [id]);
+    const [users] = await pool.query('SELECT id, name, email, spotify_id FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)', [id]);
     
     if (!users || users.length === 0) {
       console.log('⚠️  No user found with ID:', id);
@@ -43,9 +43,9 @@ passport.use(
           email: profile.emails?.[0]?.value
         });
         
-        // Check if user exists
+        // Check if user exists using subquery
         const [existingUsers] = await pool.query(
-          'SELECT * FROM users WHERE spotify_id = ?',
+          'SELECT * FROM users WHERE spotify_id IN (SELECT spotify_id FROM users WHERE spotify_id = ?)',
           [profile.id]
         );
 
@@ -56,7 +56,7 @@ passport.use(
           console.log('🔄 Updating existing user:', existingUsers[0].id);
           user = existingUsers[0];
           await pool.query(
-            'UPDATE users SET spotify_access_token = ?, spotify_refresh_token = ?, name = ?, email = ? WHERE id = ?',
+            'UPDATE users SET spotify_access_token = ?, spotify_refresh_token = ?, name = ?, email = ? WHERE id IN (SELECT id FROM (SELECT id FROM users WHERE id = ?) AS tmp)',
             [accessToken, refreshToken, profile.displayName, profile.emails?.[0]?.value || `${profile.id}@spotify.com`, user.id]
           );
           user.spotify_access_token = accessToken;
@@ -76,7 +76,7 @@ passport.use(
             ]
           );
           
-          const [newUser] = await pool.query('SELECT * FROM users WHERE id = ?', [result.insertId]);
+          const [newUser] = await pool.query('SELECT * FROM users WHERE id IN (SELECT id FROM users WHERE id = ?)', [result.insertId]);
           user = newUser[0];
           console.log('✅ New user created with ID:', user.id);
         }
@@ -116,9 +116,9 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
 
     // Store artists and link to user
     for (const artist of artistsResponse.data.items) {
-      // Check if artist exists
+      // Check if artist exists using subquery
       const [existingArtists] = await pool.query(
-        'SELECT id FROM artists WHERE spotify_id = ?',
+        'SELECT id FROM artists WHERE spotify_id IN (SELECT spotify_id FROM artists WHERE spotify_id = ?)',
         [artist.id]
       );
 
@@ -156,7 +156,7 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
       // Get or create artist for this track
       const mainArtist = track.artists[0];
       const [existingArtists] = await pool.query(
-        'SELECT id FROM artists WHERE spotify_id = ?',
+        'SELECT id FROM artists WHERE spotify_id IN (SELECT spotify_id FROM artists WHERE spotify_id = ?)',
         [mainArtist.id]
       );
 
@@ -171,9 +171,9 @@ async function fetchAndStoreSpotifyData(userId, accessToken) {
         artistId = result.insertId;
       }
 
-      // Check if song exists
+      // Check if song exists using subquery
       const [existingSongs] = await pool.query(
-        'SELECT id FROM songs WHERE spotify_id = ?',
+        'SELECT id FROM songs WHERE spotify_id IN (SELECT spotify_id FROM songs WHERE spotify_id = ?)',
         [track.id]
       );
 
