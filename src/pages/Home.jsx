@@ -56,9 +56,13 @@ const Home = ({ onLogout }) => {
       <div className="absolute w-[500px] h-[500px] bg-purple-600 blur-[160px] opacity-30 animate-pulse rounded-full bottom-10 right-10 z-0"></div>
       
       {/* Navbar with Music Match name at rightmost side */}
-      <div className="fixed top-6 left-6 right-6 flex justify-between items-center z-50">
-        <div className="text-3xl font-bold text-white">
-          Music Match
+      <div className="fixed top-3 left-8 right-6 flex justify-between items-center z-50">
+        <div className="text-3xl font-bold text-white pl-5">
+          <img 
+            src="/src/assets/music-match-logo1.png" 
+            alt="Music Match Logo" 
+            className="h-12 w-auto scale-175"
+          />
         </div>
         <div className="flex items-center space-x-4">
           {/* User Profile Capsule */}
@@ -67,13 +71,13 @@ const Home = ({ onLogout }) => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
             onClick={() => navigate('/profile')}
-            className="bg-gray-800 rounded-2xl py-2 px-6 flex items-center space-x-3 cursor-pointer hover:bg-gray-700 transition-colors"
+            className="bg-gray-800 rounded-2xl py-3 mt-4 px-5 flex items-center space-x-3 cursor-pointer hover:bg-gray-700 transition-colors  border-[2px] border-gray-700 border-dashed"
           >
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-2xl mr-5 font-bold">
               {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold">{user.name}</span>
+              <span className="font-semibold text-[1.1rem]">{user.name}</span>
               <span className="text-xs text-gray-400">{user.email}</span>
             </div>
           </motion.div>
@@ -87,7 +91,7 @@ const Home = ({ onLogout }) => {
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-5xl md:text-7xl font-extrabold mb-6 text-white text-center tracking-wide font-serif"
+          className="text-5xl md:text-7xl font-extrabold mb-3 text-white text-center tracking-wide font-serif"
         >
           Feel the Beat, Find Your Vibe
         </motion.h1>
@@ -95,7 +99,7 @@ const Home = ({ onLogout }) => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto text-center mb-12"
+          className="text-xl md:text-xl text-gray-300 max-w-3xl mx-auto text-center mb-8"
         >
           "Where melodies meet and souls connect through the universal language of music."
         </motion.p>
@@ -108,7 +112,7 @@ const Home = ({ onLogout }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             onClick={() => navigate('/discover')}
-            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105 min-w-[200px]"
+            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105 min-w-[200px] border-[1px] border-gray-700"
           >
             <div className="flex flex-col items-center">
               <span className="text-xl font-semibold">Discover People</span>
@@ -122,7 +126,7 @@ const Home = ({ onLogout }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             onClick={() => navigate('/ranking')}
-            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-105 min-w-[200px]"
+            className="bg-gray-900 rounded-3xl py-4 px-8 flex items-center justify-center space-x-4 cursor-pointer hover:bg-gray-800 transition-colors transform hover:scale-104 min-w-[200px]  border-[1px] border-gray-700"
           >
             <div className="flex flex-col items-center">
               <span className="text-xl font-semibold">View Rankings</span>

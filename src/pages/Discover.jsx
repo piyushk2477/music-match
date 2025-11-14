@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowLeft, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 const Discover = () => {
   const navigate = useNavigate();
@@ -106,32 +107,32 @@ const Discover = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-black text-white"
+      className="min-h-screen bg-black text-white relative"
     >
+      <AnimatedBackground />
       {/* Header with Back Button */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="flex items-center p-6"
+        className="flex items-center p-6 relative z-10"
       >
         <motion.button
-          whileHover={{ x: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/home')}
-          className="flex items-center text-gray-400 hover:text-white"
+          className="flex items-center text-gray-400 hover:text-white border border-dashed border-gray-400 px-4 py-2 rounded ml-4 cursor-pointer"
         >
           <FaArrowLeft className="mr-2" /> Back to Home
         </motion.button>
       </motion.div>
       
       {/* Discover Content */}
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 relative z-10">
         <motion.h1 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-3xl font-bold mb-6 text-white"
+          className="text-3xl font-bold mb-6 text-white text-center font-serif"
         >
           Discover People
         </motion.h1>
@@ -141,7 +142,7 @@ const Discover = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mb-6 flex flex-wrap gap-3"
+          className="mb-6 flex flex-wrap gap-3 justify-center"
         >
           <button
             onClick={() => handleSortChange('name')}

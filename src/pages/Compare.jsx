@@ -124,7 +124,7 @@ const Compare = ({ onBack }) => {
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white flex flex-col items-center py-10 px-6">
         <button
           onClick={() => navigate('/discover')}
-          className="self-start mb-8 px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded-full text-sm font-semibold"
+          className="self-start mb-8 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-dashed border-gray-400 cursor-pointer"
         >
           ← Back to Discover
         </button>
@@ -144,7 +144,7 @@ const Compare = ({ onBack }) => {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white flex flex-col items-center py-10 px-6">
       <button
         onClick={() => navigate('/discover')}
-        className="self-start mb-8 px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded-full text-sm font-semibold"
+        className="self-start mb-8 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-dashed border-gray-400 cursor-pointer"
       >
         ← Back to Discover
       </button>

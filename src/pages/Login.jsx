@@ -42,7 +42,11 @@ const Login = ({ onLogin, isAuthenticated }) => {
             transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             className="text-5xl font-extrabold text-green-400 mb-2"
           >
-            Music Match
+            <img 
+              src="/src/assets/music-match-logo.png" 
+              alt="Music Match Logo" 
+              className="h-20 w-auto mx-auto"
+            />
           </motion.h1>
           <motion.h2 
             initial={{ y: 10, opacity: 0 }}
@@ -81,7 +85,7 @@ const Login = ({ onLogin, isAuthenticated }) => {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={handleSpotifyLogin}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg"
+              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg cursor-pointer"
             >
               <motion.svg 
                 initial={{ rotate: -10 }}

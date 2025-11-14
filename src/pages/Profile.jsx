@@ -476,7 +476,7 @@ const Profile = ({ onLogout }) => {
     <div className="min-h-screen bg-black text-white p-6">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center text-gray-400 hover:text-white mb-6"
+        className="flex items-center text-gray-400 hover:text-white mb-6 border border-dashed border-gray-400 px-4 py-2 rounded"
       >
         <FaArrowLeft className="mr-2" /> Back
       </button>
@@ -735,13 +735,13 @@ const Profile = ({ onLogout }) => {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
           onClick={() => setShowChangePassword(true)}
-          className="py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center"
+          className="py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center cursor-pointer"
         >
           Change Password
         </button>
         <button
           onClick={() => setShowDeleteAccount(true)}
-          className="py-6 bg-red-900 hover:bg-red-700 rounded-lg transition-colors text-center"
+          className="py-6 bg-red-900 hover:bg-red-700 rounded-lg transition-colors text-center cursor-pointer"
         >
           <div className="flex items-center justify-center">
             <FaTrash className="mr-2" />

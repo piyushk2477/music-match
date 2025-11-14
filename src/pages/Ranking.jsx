@@ -95,10 +95,9 @@ const Ranking = () => {
         className="flex items-center p-6"
       >
         <motion.button
-          whileHover={{ x: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/home')}
-          className="flex items-center text-gray-400 hover:text-white"
+          className="flex items-center text-gray-400 hover:text-white border border-dashed border-gray-400 px-4 py-2 rounded bg-gray-950 cursor-pointer"
         >
           <FaArrowLeft className="mr-2" /> Back to Home
         </motion.button>
@@ -239,9 +238,9 @@ const Ranking = () => {
               </div>
             </div>
             
-            {/* Remaining Users */}
+            {/* Remaining Users (4th to 10th place) */}
             <div className="max-w-3xl mx-auto">
-              {users.slice(3).map((user, index) => (
+              {users.slice(3, 10).map((user, index) => (
                 <motion.div
                   key={user.userId}
                   initial={{ opacity: 0, y: 20 }}

@@ -181,7 +181,16 @@ const AuthCallback = ({ onLogin }) => {
               disabled={isSubmitting}
               className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {isSubmitting ? 'Setting up...' : 'Continue to Music Match'}
+              {isSubmitting ? 'Setting up...' : (
+                <span className="flex items-center justify-center">
+                  <img 
+                    src="/src/assets/music-match-logo.png" 
+                    alt="Music Match Logo" 
+                    className="h-6 w-auto mr-2"
+                  />
+                  Continue
+                </span>
+              )}
             </button>
           </form>
         </div>
