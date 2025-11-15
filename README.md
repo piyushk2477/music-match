@@ -20,13 +20,13 @@ Music Match is a social music platform that connects people through their musica
 
 ## Tech Stack & Prerequisites
 
-| Frontend | Backend | Prerequisites |
-|----------|---------|---------------|
-| React 19 with Vite | Node.js with Express | Node.js (v14 or higher) |
-| TailwindCSS | MySQL database | npm or yarn |
-| Framer Motion | Spotify API integration | MySQL database |
-| React Router | Passport.js | Spotify Developer Account |
-| React Icons | CORS-enabled API | |
+| # | Frontend | Backend | Prerequisites |
+|---|----------|---------|---------------|
+| 1 | React 19 with Vite | Node.js with Express | Node.js (v14 or higher) |
+| 2 | TailwindCSS | MySQL database | npm or yarn |
+| 3 | Framer Motion | Spotify API integration | MySQL database |
+| 4 | React Router | Passport.js | Spotify Developer Account |
+| 5 | React Icons | CORS-enabled API | Code editor (VS Code recommended) |
 
 
 ## Installation
