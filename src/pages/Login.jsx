@@ -21,13 +21,77 @@ const Login = ({ onLogin, isAuthenticated }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex items-center justify-center bg-black py-12 px-4"
+      className="min-h-screen flex items-center justify-center py-12 px-4 relative overflow-hidden"
     >
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+        <motion.div 
+          animate={{ 
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+          }}
+          transition={{ 
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-30"
+        ></motion.div>
+        <motion.div 
+          animate={{ 
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{ 
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-600 rounded-full mix-blend-soft-light filter blur-3xl opacity-30"
+        ></motion.div>
+        <motion.div 
+          animate={{ 
+            x: [0, 50, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{ 
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+        ></motion.div>
+      </div>
+      
+      {/* Floating music notes */}
+      <motion.div 
+        animate={{ y: [0, -20, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-20 left-10 text-green-400 opacity-20 text-4xl"
+      >
+        ♪
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -15, 0] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        className="absolute top-32 right-20 text-purple-400 opacity-20 text-3xl"
+      >
+        ♫
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -25, 0] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-40 left-20 text-blue-400 opacity-20 text-5xl"
+      >
+        ♩
+      </motion.div>
+      
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-full max-w-md space-y-8"
+        className="w-full max-w-md space-y-8 relative z-10"
       >
         {/* Header */}
         <motion.div 
@@ -71,7 +135,7 @@ const Login = ({ onLogin, isAuthenticated }) => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="bg-gray-900 rounded-2xl shadow-2xl p-8 border border-gray-800"
+          className="bg-gray-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-gray-700/50"
         >
           <motion.div 
             initial={{ y: 10, opacity: 0 }}
@@ -85,7 +149,7 @@ const Login = ({ onLogin, isAuthenticated }) => {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={handleSpotifyLogin}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg cursor-pointer"
+              className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 rounded-xl text-white font-semibold transition-all flex items-center justify-center gap-3 shadow-lg cursor-pointer shadow-green-500/20"
             >
               <motion.svg 
                 initial={{ rotate: -10 }}

@@ -473,18 +473,29 @@ const Profile = ({ onLogout }) => {
   // UI
   // ----------------------------------
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-6 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+        <div 
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+        ></div>
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-green-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+        ></div>
+      </div>
+      
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center text-gray-400 hover:text-white mb-6 border border-dashed border-gray-400 px-4 py-2 rounded"
+        className="flex items-center text-gray-400 hover:text-white mb-6 border border-dashed border-gray-400 px-4 py-2 rounded relative z-10 backdrop-blur-sm bg-black/30"
       >
         <FaArrowLeft className="mr-2" /> Back
       </button>
 
       {/* USER HEADER */}
-      <div className="bg-gray-900 p-6 rounded-[5px] mb-6 flex items-center justify-between">
+      <div className="bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl mb-6 flex items-center justify-between border border-gray-700/50 relative z-10 shadow-xl">
         <div className="flex items-center gap-6">
-          <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-4xl font-bold">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg">
             {user.name?.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -501,7 +512,7 @@ const Profile = ({ onLogout }) => {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg transition-all shadow-lg"
         >
           <FaSignOutAlt />
           <span>Logout</span>
@@ -510,7 +521,7 @@ const Profile = ({ onLogout }) => {
 
       {/* Change Password Form */}
       {showChangePassword && (
-        <div className="bg-gray-900 p-6 rounded-xl mb-6">
+        <div className="bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl mb-6 border border-gray-700/50 relative z-10 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Change Password</h2>
             <button 
@@ -529,13 +540,13 @@ const Profile = ({ onLogout }) => {
           </div>
           
           {passwordSuccess && (
-            <div className="bg-green-900/30 border border-green-700 text-green-200 p-3 rounded-lg mb-4">
+            <div className="bg-green-900/30 border border-green-700 text-green-200 p-3 rounded-lg mb-4 backdrop-blur-sm">
               {passwordSuccess}
             </div>
           )}
           
           {passwordError && (
-            <div className="bg-red-900/30 border border-red-700 text-red-200 p-3 rounded-lg mb-4">
+            <div className="bg-red-900/30 border border-red-700 text-red-200 p-3 rounded-lg mb-4 backdrop-blur-sm">
               {passwordError}
             </div>
           )}
@@ -550,7 +561,7 @@ const Profile = ({ onLogout }) => {
                 id="currentPassword"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white backdrop-blur-sm placeholder-gray-400"
                 placeholder="Enter current password"
                 disabled={isChangingPassword}
               />
@@ -565,7 +576,7 @@ const Profile = ({ onLogout }) => {
                 id="newPassword"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white backdrop-blur-sm placeholder-gray-400"
                 placeholder="Enter new password (min 6 characters)"
                 disabled={isChangingPassword}
               />
@@ -580,7 +591,7 @@ const Profile = ({ onLogout }) => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white backdrop-blur-sm placeholder-gray-400"
                 placeholder="Confirm new password"
                 disabled={isChangingPassword}
               />
@@ -597,7 +608,7 @@ const Profile = ({ onLogout }) => {
                   setNewPassword("");
                   setConfirmPassword("");
                 }}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg transition-colors backdrop-blur-sm border border-gray-600"
                 disabled={isChangingPassword}
               >
                 Cancel
@@ -605,7 +616,7 @@ const Profile = ({ onLogout }) => {
               <button
                 type="submit"
                 disabled={isChangingPassword}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-lg transition-colors flex items-center"
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:bg-gray-600 rounded-lg transition-all flex items-center shadow-lg"
               >
                 {isChangingPassword ? (
                   <>
@@ -623,8 +634,8 @@ const Profile = ({ onLogout }) => {
 
       {/* Delete Account Confirmation Modal */}
       {showDeleteAccount && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-xl p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-xl p-6 max-w-md w-full border border-gray-700/50 shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Delete Account</h2>
               <button 
@@ -645,7 +656,7 @@ const Profile = ({ onLogout }) => {
               <button
                 type="button"
                 onClick={() => setShowDeleteAccount(false)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg transition-colors backdrop-blur-sm border border-gray-600"
                 disabled={isDeletingAccount}
               >
                 Cancel
@@ -653,7 +664,7 @@ const Profile = ({ onLogout }) => {
               <button
                 onClick={handleDeleteAccount}
                 disabled={isDeletingAccount}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded-lg transition-colors flex items-center"
+                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:bg-gray-600 rounded-lg transition-all flex items-center shadow-lg"
               >
                 {isDeletingAccount ? (
                   <>
@@ -672,10 +683,9 @@ const Profile = ({ onLogout }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
         {/* FAVORITE ARTISTS */}
-        <div className="bg-gray-900 p-6 rounded-xl">
+        <div className="bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl border border-gray-700/50 shadow-xl">
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center">
               <FaUser className="text-green-400 mr-2" />
@@ -689,23 +699,21 @@ const Profile = ({ onLogout }) => {
               favorites.artists.map((a) => (
                 <li
                   key={a.id}
-                  className="bg-gray-800 p-3 rounded flex justify-between items-center"
+                  className="bg-gray-800/50 p-3 rounded flex justify-between items-center backdrop-blur-sm border border-gray-700/30"
                 >
                   {a.artist_name}
                 </li>
               ))
             ) : (
-              <li className="bg-gray-800 p-3 rounded text-gray-400 text-center">
+              <li className="bg-gray-800/50 p-3 rounded text-gray-400 text-center backdrop-blur-sm border border-gray-700/30">
                 No favorite artists found. Login with Spotify to import your favorites.
               </li>
             )}
           </ul>
-          
-          
         </div>
 
         {/* FAVORITE SONGS */}
-        <div className="bg-gray-900 p-6 rounded-xl">
+        <div className="bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl border border-gray-700/50 shadow-xl">
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center">
               <FaMusic className="text-green-400 mr-2" />
@@ -718,7 +726,7 @@ const Profile = ({ onLogout }) => {
             {favorites.songs.map((s) => (
               <li
                 key={s.id}
-                className="bg-gray-800 p-3 rounded"
+                className="bg-gray-800/50 p-3 rounded backdrop-blur-sm border border-gray-700/30"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2">
@@ -731,17 +739,18 @@ const Profile = ({ onLogout }) => {
           </ul>
         </div>
       </div>
+      
       {/* Change Password Button */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
         <button
           onClick={() => setShowChangePassword(true)}
-          className="py-6 bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors text-center cursor-pointer"
+          className="py-6 bg-gray-900/30 hover:bg-gray-700/30 rounded-lg transition-all text-center cursor-pointer backdrop-blur-lg border border-gray-700/50 shadow-lg"
         >
           Change Password
         </button>
         <button
           onClick={() => setShowDeleteAccount(true)}
-          className="py-6 bg-red-900 hover:bg-red-700 rounded-lg transition-colors text-center cursor-pointer"
+          className="py-6 bg-red-900/30 hover:bg-red-700/30 rounded-lg transition-all text-center cursor-pointer backdrop-blur-lg border border-gray-700/50 shadow-lg"
         >
           <div className="flex items-center justify-center">
             <FaTrash className="mr-2" />

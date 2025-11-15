@@ -11,6 +11,8 @@ const Discover = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [sortBy, setSortBy] = useState('name'); // Default sort by name
   const [sortOrder, setSortOrder] = useState('ASC'); // Default ascending
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+  const [filteredUsers, setFilteredUsers] = useState([]); // New state for filtered users
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -37,6 +39,7 @@ const Discover = () => {
             // Filter out current user
             const otherUsers = data.data.users.filter(user => user.userId !== parsedUser?.id);
             setUsers(otherUsers);
+            setFilteredUsers(otherUsers); // Initialize filtered users
           }
         }
       } catch (error) {
@@ -48,6 +51,18 @@ const Discover = () => {
 
     fetchUsers();
   }, [sortBy, sortOrder]);
+
+  // Filter users based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user => 
+        user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [searchTerm, users]);
 
   const handleUserClick = (user) => {
     // Navigate to compare page with user data
@@ -137,11 +152,34 @@ const Discover = () => {
           Discover People
         </motion.h1>
         
-        {/* Sort Filters */}
+        {/* Search Bar */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="mb-6 max-w-2xl mx-auto"
+        >
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search users by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+        </motion.div>
+        
+        {/* Sort Filters */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
           className="mb-6 flex flex-wrap gap-3 justify-center"
         >
           <button
@@ -173,23 +211,23 @@ const Discover = () => {
           </button>
         </motion.div>
         
-        {users.length === 0 ? (
+        {filteredUsers.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No other users found.
+            {searchTerm ? 'No users found matching your search.' : 'No other users found.'}
           </div>
         ) : (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-10 gap-4 px-20"
           >
-            {users.map((user, index) => (
+            {filteredUsers.map((user, index) => (
               <motion.div
                 key={user.userId}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
+                transition={{ delay: 0.6 + index * 0.1 }}
                 whileHover={{ y: -5 }}
                 onClick={() => handleUserClick(user)}
                 className="p-4 cursor-pointer transition-colors"

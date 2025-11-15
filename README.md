@@ -178,3 +178,11 @@ music-match/
 
 This project is licensed under the MIT License.
 
+## Screenshots
+
+![Screenshot 1](/public/1.png)
+![Screenshot 2](/public/2.png)
+![Screenshot 3](/public/3.png)
+![Screenshot 4](/public/4.png)
+![Screenshot 5](/public/5.png)
+![Screenshot 6](/public/6.png)

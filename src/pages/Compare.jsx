@@ -113,22 +113,42 @@ const Compare = ({ onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center justify-center relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+          <div 
+            className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+          ></div>
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+          ></div>
+        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 relative z-10"></div>
       </div>
     );
   }
 
   if (!selectedUser || !currentUserData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white flex flex-col items-center py-10 px-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex flex-col items-center py-10 px-6 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+          <div 
+            className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+          ></div>
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+          ></div>
+        </div>
         <button
           onClick={() => navigate('/discover')}
-          className="self-start mb-8 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-dashed border-gray-400 cursor-pointer"
+          className="self-start mb-8 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded border border-dashed border-gray-400 cursor-pointer backdrop-blur-sm relative z-10"
         >
           ← Back to Discover
         </button>
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-500 relative z-10">
           User data not available.
         </div>
       </div>
@@ -141,20 +161,31 @@ const Compare = ({ onBack }) => {
   const similarityPercentage = Math.round(combinedSimilarity * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white flex flex-col items-center py-10 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex flex-col items-center py-10 px-6 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+        <div 
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+        ></div>
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-soft-light filter blur-3xl opacity-20"
+        ></div>
+      </div>
+      
       <button
         onClick={() => navigate('/discover')}
-        className="self-start mb-8 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-dashed border-gray-400 cursor-pointer"
+        className="self-start mb-8 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded border border-dashed border-gray-400 cursor-pointer backdrop-blur-sm relative z-10"
       >
         ← Back to Discover
       </button>
 
-      <h1 className="text-4xl font-extrabold mb-10 text-green-400 text-center">
+      <h1 className="text-4xl font-extrabold mb-10 text-green-400 text-center relative z-10">
         Music Taste Comparison
       </h1>
 
       {/* Similarity Score */}
-      <div className="mb-10 bg-gray-900 bg-opacity-70 rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
+      <div className="mb-10 bg-gray-900/30 backdrop-blur-lg rounded-2xl shadow-xl p-6 w-full max-w-md text-center border border-gray-700/50 relative z-10">
         <h2 className="text-2xl font-bold mb-2">Similarity Score</h2>
         <div className="text-5xl font-bold text-green-400 mb-2">
           {similarityPercentage}%
@@ -165,10 +196,10 @@ const Compare = ({ onBack }) => {
       </div>
 
       {/* Profile Comparison */}
-      <div className="flex flex-col md:flex-row justify-center gap-12 w-full max-w-5xl">
+      <div className="flex flex-col md:flex-row justify-center gap-12 w-full max-w-5xl relative z-10">
         {/* Current User Profile */}
-        <div className="flex-1 bg-gray-900 bg-opacity-70 rounded-2xl shadow-lg p-6 flex flex-col items-center">
-          <div className={`w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-4 ${getColorForUser(currentUserData.name)}`}>
+        <div className="flex-1 bg-gray-900/30 backdrop-blur-lg rounded-2xl shadow-xl p-6 flex flex-col items-center border border-gray-700/50">
+          <div className={`w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-4 ${getColorForUser(currentUserData.name)} shadow-lg`}>
             {getInitials(currentUserData.name)}
           </div>
           <h2 className="text-2xl font-bold mb-2">{currentUserData.name}</h2>
@@ -186,7 +217,7 @@ const Compare = ({ onBack }) => {
             <ul className="space-y-2 text-gray-300">
               {currentUserData.topSongs && currentUserData.topSongs.length > 0 ? (
                 currentUserData.topSongs.slice(0, 5).map((song, i) => (
-                  <li key={song.id} className="border-b border-gray-700 pb-1">
+                  <li key={song.id} className="border-b border-gray-700/50 pb-1 backdrop-blur-sm bg-gray-800/20 rounded px-2">
                     {i + 1}. {song.song_name}
                   </li>
                 ))
@@ -203,7 +234,7 @@ const Compare = ({ onBack }) => {
             <ul className="space-y-2 text-gray-300">
               {currentUserData.topArtists && currentUserData.topArtists.length > 0 ? (
                 currentUserData.topArtists.slice(0, 5).map((artist, i) => (
-                  <li key={artist.id} className="border-b border-gray-700 pb-1">
+                  <li key={artist.id} className="border-b border-gray-700/50 pb-1 backdrop-blur-sm bg-gray-800/20 rounded px-2">
                     {i + 1}. {artist.artist_name}
                   </li>
                 ))
@@ -216,14 +247,14 @@ const Compare = ({ onBack }) => {
 
         {/* VS Divider */}
         <div className="flex items-center justify-center">
-          <div className="bg-green-500 text-black font-extrabold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 text-black font-extrabold rounded-full w-16 h-16 flex items-center justify-center text-xl shadow-xl relative z-10">
             VS
           </div>
         </div>
 
         {/* Selected User Profile */}
-        <div className="flex-1 bg-gray-900 bg-opacity-70 rounded-2xl shadow-lg p-6 flex flex-col items-center">
-          <div className={`w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-4 ${getColorForUser(selectedUser.userName)}`}>
+        <div className="flex-1 bg-gray-900/30 backdrop-blur-lg rounded-2xl shadow-xl p-6 flex flex-col items-center border border-gray-700/50">
+          <div className={`w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-4 ${getColorForUser(selectedUser.userName)} shadow-lg`}>
             {getInitials(selectedUser.userName)}
           </div>
           <h2 className="text-2xl font-bold mb-2">{selectedUser.userName}</h2>
@@ -241,7 +272,7 @@ const Compare = ({ onBack }) => {
             <ul className="space-y-2 text-gray-300">
               {selectedUser.topSongs && selectedUser.topSongs.length > 0 ? (
                 selectedUser.topSongs.slice(0, 5).map((song, i) => (
-                  <li key={song.id} className="border-b border-gray-700 pb-1">
+                  <li key={song.id} className="border-b border-gray-700/50 pb-1 backdrop-blur-sm bg-gray-800/20 rounded px-2">
                     {i + 1}. {song.song_name}
                   </li>
                 ))
@@ -258,7 +289,7 @@ const Compare = ({ onBack }) => {
             <ul className="space-y-2 text-gray-300">
               {selectedUser.topArtists && selectedUser.topArtists.length > 0 ? (
                 selectedUser.topArtists.slice(0, 5).map((artist, i) => (
-                  <li key={artist.id} className="border-b border-gray-700 pb-1">
+                  <li key={artist.id} className="border-b border-gray-700/50 pb-1 backdrop-blur-sm bg-gray-800/20 rounded px-2">
                     {i + 1}. {artist.artist_name}
                   </li>
                 ))
@@ -271,7 +302,7 @@ const Compare = ({ onBack }) => {
       </div>
 
       {/* Detailed Similarity Breakdown */}
-      <div className="mt-10 bg-gray-900 bg-opacity-70 rounded-2xl shadow-lg p-6 w-full max-w-md">
+      <div className="mt-10 bg-gray-900/30 backdrop-blur-lg rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-700/50 relative z-10">
         <h3 className="text-xl font-bold mb-4 text-center">Similarity Breakdown</h3>
         <div className="space-y-3">
           <div>
@@ -281,9 +312,9 @@ const Compare = ({ onBack }) => {
                 {Math.round(songSimilarity * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-700/50 rounded-full h-2 backdrop-blur-sm">
               <div 
-                className="bg-green-500 h-2 rounded-full" 
+                className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full" 
                 style={{ width: `${songSimilarity * 100}%` }}
               ></div>
             </div>
@@ -295,9 +326,9 @@ const Compare = ({ onBack }) => {
                 {Math.round(artistSimilarity * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-700/50 rounded-full h-2 backdrop-blur-sm">
               <div 
-                className="bg-green-500 h-2 rounded-full" 
+                className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full" 
                 style={{ width: `${artistSimilarity * 100}%` }}
               ></div>
             </div>
