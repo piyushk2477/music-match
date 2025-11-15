@@ -13,10 +13,10 @@ Music Match is a social music platform that connects people through their musica
 
 ## Authors
 
-- - **Prakash Swami**
-- - **Darsh Sonsale**
-- - **Piyush Kanakdande**
-- - **Akshita Verma**
+ - **Prakash Swami**
+ - **Darsh Sonsale**
+ - **Piyush Kanakdande**
+ - **Akshita Verma**
 
 ## Tech Stack & Prerequisites
 
