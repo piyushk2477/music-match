@@ -36,22 +36,12 @@ Music Match is a social music platform that connects people through their musica
 
 ## Authors
 
-- **Prakash Swami**
-  - [LinkedIn](https://www.linkedin.com/in/prakash-swami)
-  - [GitHub](https://github.com/sprakash2006)
-  
-- **Darsh Sonsale**
-  - [LinkedIn](https://www.linkedin.com/in/darshsonsale)
-  - [GitHub](https://github.com/darshsonsale)
-  
-- **Piyush Kanakdande**
-  - [LinkedIn](https://www.linkedin.com/in/piyush-kanakdande-9b8161332/)
-  - [GitHub](https://github.com/piyushk2477)
-  
-- **Akshita Verma**
-  - [LinkedIn](https://www.linkedin.com/in/akshita-verma-5a215a332/)
-  - [GitHub](#)
-
+| Name | LinkedIn | GitHub |
+|------|----------|--------|
+| **Prakash Swami** | [LinkedIn](https://www.linkedin.com/in/prakashswami) | [GitHub](https://github.com/prakashswami) |
+| **Author 2** | [LinkedIn](#) | [GitHub](#) |
+| **Author 3** | [LinkedIn](#) | [GitHub](#) |
+| **Author 4** | [LinkedIn](#) | [GitHub](#) |
 
 ## Installation
 
