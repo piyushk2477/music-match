@@ -11,34 +11,24 @@ Music Match is a social music platform that connects people through their musica
 - **User Profiles**: Personalized profiles with favorite artists and songs
 - **Responsive Design**: Works on desktop and mobile devices
 
-## Tech Stack
+## Tech Stack & Prerequisites
 
-### Frontend
-
-| Technology | Purpose |
-|------------|---------|
-| React 19 with Vite | Core framework and build tool |
-| TailwindCSS | Styling and CSS framework |
-| Framer Motion | Animations and transitions |
-| React Router | Navigation and routing |
-| React Icons | UI icons library |
-
-### Backend
-
-| Technology | Purpose |
-|------------|---------|
-| Node.js with Express | Server runtime and framework |
-| MySQL database | Data storage |
-| Spotify API integration | Music data and authentication |
-| Passport.js | Authentication middleware |
-| CORS-enabled API | Cross-origin resource sharing |
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- MySQL database
-- Spotify Developer Account
+| Category | Technology | Purpose/Requirement |
+|----------|------------|---------------------|
+| Frontend | React 19 with Vite | Core framework and build tool |
+| Frontend | TailwindCSS | Styling and CSS framework |
+| Frontend | Framer Motion | Animations and transitions |
+| Frontend | React Router | Navigation and routing |
+| Frontend | React Icons | UI icons library |
+| Backend | Node.js with Express | Server runtime and framework |
+| Backend | MySQL database | Data storage |
+| Backend | Spotify API integration | Music data and authentication |
+| Backend | Passport.js | Authentication middleware |
+| Backend | CORS-enabled API | Cross-origin resource sharing |
+| Prerequisites | Node.js | Version 14 or higher |
+| Prerequisites | npm or yarn | Package managers |
+| Prerequisites | MySQL database | Database system |
+| Prerequisites | Spotify Developer Account | API access |
 
 ## Authors
 
