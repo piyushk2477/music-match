@@ -14,18 +14,24 @@ Music Match is a social music platform that connects people through their musica
 ## Tech Stack
 
 ### Frontend
-- React 19 with Vite
-- TailwindCSS for styling
-- Framer Motion for animations
-- React Router for navigation
-- React Icons for UI icons
+
+| Technology | Purpose |
+|------------|---------|
+| React 19 with Vite | Core framework and build tool |
+| TailwindCSS | Styling and CSS framework |
+| Framer Motion | Animations and transitions |
+| React Router | Navigation and routing |
+| React Icons | UI icons library |
 
 ### Backend
-- Node.js with Express
-- MySQL database
-- Spotify API integration
-- Passport.js for authentication
-- CORS-enabled API
+
+| Technology | Purpose |
+|------------|---------|
+| Node.js with Express | Server runtime and framework |
+| MySQL database | Data storage |
+| Spotify API integration | Music data and authentication |
+| Passport.js | Authentication middleware |
+| CORS-enabled API | Cross-origin resource sharing |
 
 ## Prerequisites
 
