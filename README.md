@@ -11,31 +11,23 @@ Music Match is a social music platform that connects people through their musica
 - **User Profiles**: Personalized profiles with favorite artists and songs
 - **Responsive Design**: Works on desktop and mobile devices
 
-## Tech Stack & Prerequisites
-
-| Category | Technology | Purpose/Requirement |
-|----------|------------|---------------------|
-| Frontend | React 19 with Vite | Core framework and build tool |
-| Frontend | TailwindCSS | Styling and CSS framework |
-| Frontend | Framer Motion | Animations and transitions |
-| Frontend | React Router | Navigation and routing |
-| Frontend | React Icons | UI icons library |
-| Backend | Node.js with Express | Server runtime and framework |
-| Backend | MySQL database | Data storage |
-| Backend | Spotify API integration | Music data and authentication |
-| Backend | Passport.js | Authentication middleware |
-| Backend | CORS-enabled API | Cross-origin resource sharing |
-| Prerequisites | Node.js | Version 14 or higher |
-| Prerequisites | npm or yarn | Package managers |
-| Prerequisites | MySQL database | Database system |
-| Prerequisites | Spotify Developer Account | API access |
-
 ## Authors
 
-- [**Prakash Swami**](https://www.linkedin.com/in/prakashswami)
-- [**Author 2**](#) 
-- [**Author 3**](#) 
-- [**Author 4**](#) 
+- - **Prakash Swami**
+- - **Darsh Sonsale**
+- - **Piyush Kanakdande**
+- - **Akshita Verma**
+
+## Tech Stack & Prerequisites
+
+| Frontend | Backend | Prerequisites |
+|----------|---------|---------------|
+| React 19 with Vite | Node.js with Express | Node.js (v14 or higher) |
+| TailwindCSS | MySQL database | npm or yarn |
+| Framer Motion | Spotify API integration | MySQL database |
+| React Router | Passport.js | Spotify Developer Account |
+| React Icons | CORS-enabled API | |
+
 
 ## Installation
 
