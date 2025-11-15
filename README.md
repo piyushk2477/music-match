@@ -36,9 +36,9 @@ Music Match is a social music platform that connects people through their musica
 
 ## Authors
 
-| Name | LinkedIn | GitHub |
-|------|----------|--------|
-| **Prakash Swami** | [LinkedIn](https://www.linkedin.com/in/prakashswami) | [GitHub](https://github.com/prakashswami) |
+| Name       | LinkedIn | GitHub |
+|------------|----------|--------|
+| **Prakash Swami**       | [LinkedIn](https://www.linkedin.com/in/prakashswami) | [GitHub](https://github.com/prakashswami) |
 | **Author 2** | [LinkedIn](#) | [GitHub](#) |
 | **Author 3** | [LinkedIn](#) | [GitHub](#) |
 | **Author 4** | [LinkedIn](#) | [GitHub](#) |
