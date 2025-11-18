@@ -86,6 +86,25 @@ async function setupDatabase() {
     `);
     console.log('User favorite songs table created');
 
+    // Create users_backup table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS users_backup (
+        id INT,
+        name VARCHAR(100) NOT NULL,
+        username VARCHAR(50),
+        email VARCHAR(150) NOT NULL,
+        password VARCHAR(255),
+        spotify_id VARCHAR(255),
+        spotify_access_token TEXT,
+        spotify_refresh_token TEXT,
+        listening_minutes INT DEFAULT 0,
+        operation_type ENUM('UPDATE', 'DELETE') NOT NULL,
+        operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        backup_reason VARCHAR(100)
+      )
+    `);
+    console.log('Users backup table created');
+
     await connection.end();
     console.log('\nDatabase setup completed successfully!');
     console.log('You can now start your backend server and try Spotify login.\n');

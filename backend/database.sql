@@ -54,3 +54,58 @@ CREATE TABLE IF NOT EXISTS user_fav_songs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
 );
+
+-- Create backup table for user demographic data
+CREATE TABLE IF NOT EXISTS users_backup (
+    id INT,
+    name VARCHAR(100) NOT NULL,
+    username VARCHAR(50),
+    email VARCHAR(150) NOT NULL,
+    password VARCHAR(255),
+    spotify_id VARCHAR(255),
+    spotify_access_token TEXT,
+    spotify_refresh_token TEXT,
+    listening_minutes INT DEFAULT 0,
+    operation_type ENUM('UPDATE', 'DELETE') NOT NULL,
+    operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    backup_reason VARCHAR(100)
+);
+
+-- Trigger to backup user data before password update
+DELIMITER $$
+
+CREATE TRIGGER backup_user_before_password_update
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+BEGIN
+    -- Check if password is being updated
+    IF OLD.password != NEW.password THEN
+        INSERT INTO users_backup (
+            id, name, username, email, password, spotify_id, 
+            spotify_access_token, spotify_refresh_token, listening_minutes,
+            operation_type, backup_reason
+        ) VALUES (
+            OLD.id, OLD.name, OLD.username, OLD.email, OLD.password, OLD.spotify_id,
+            OLD.spotify_access_token, OLD.spotify_refresh_token, OLD.listening_minutes,
+            'UPDATE', 'Password Change'
+        );
+    END IF;
+END$$
+
+-- Trigger to backup user data before account deletion
+CREATE TRIGGER backup_user_before_delete
+    BEFORE DELETE ON users
+    FOR EACH ROW
+BEGIN
+    INSERT INTO users_backup (
+        id, name, username, email, password, spotify_id,
+        spotify_access_token, spotify_refresh_token, listening_minutes,
+        operation_type, backup_reason
+    ) VALUES (
+        OLD.id, OLD.name, OLD.username, OLD.email, OLD.password, OLD.spotify_id,
+        OLD.spotify_access_token, OLD.spotify_refresh_token, OLD.listening_minutes,
+        'DELETE', 'Account Deletion'
+    );
+END$$
+
+DELIMITER ;

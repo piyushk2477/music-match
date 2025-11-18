@@ -3,11 +3,15 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
-const authRoutes = require('./auth');
 const passport = require('./spotify-auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const dataRoutes = require('./routes/dataRoutes');
 
 // CORS Configuration
 const allowedOrigins = [
@@ -84,13 +88,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Routes - Auth
-app.get('/api/test-db', authRoutes.testDbConnection);
-app.post('/api/auth/login', authRoutes.loginUser);
-app.get('/api/auth/me', authRoutes.isAuthenticated, authRoutes.getCurrentUser);
-app.post('/api/auth/logout', authRoutes.logoutUser);
-app.post('/api/auth/set-password', authRoutes.isAuthenticated, authRoutes.setUserPassword);
-app.delete('/api/auth/account', authRoutes.isAuthenticated, authRoutes.deleteAccount);
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/data', dataRoutes);
 
 // Spotify OAuth Routes
 app.get('/api/auth/spotify', passport.authenticate('spotify', {
@@ -157,21 +158,6 @@ app.get('/callback',
     })(req, res, next);
   }
 );
-
-// Favorites
-app.get('/api/user/favorites', authRoutes.isAuthenticated, authRoutes.getUserFavorites);
-app.post('/api/user/favorites/artist', authRoutes.isAuthenticated, authRoutes.addFavoriteArtist);
-app.post('/api/user/favorites/song', authRoutes.isAuthenticated, authRoutes.addFavoriteSong);
-
-// User similarity
-app.get('/api/user/similarity', authRoutes.isAuthenticated, authRoutes.getUserSimilarity);
-
-// Get all users with their favorites
-app.get('/api/users/all', authRoutes.isAuthenticated, authRoutes.getAllUsersWithFavorites);
-
-// Public data
-app.get('/api/artists', authRoutes.getAllArtists);
-app.get('/api/songs', authRoutes.getAllSongs);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -249,7 +235,16 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`- GET  /api/auth/me`);
   console.log(`- POST /api/auth/logout`);
   console.log(`- POST /api/auth/set-password`);
-  console.log(`- DELETE /api/auth/account\n`);
+  console.log(`- DELETE /api/auth/account`);
+  console.log(`- GET  /api/user/favorites`);
+  console.log(`- POST /api/user/favorites/artist`);
+  console.log(`- POST /api/user/favorites/song`);
+  console.log(`- DELETE /api/user/favorites/artist`);
+  console.log(`- DELETE /api/user/favorites/song`);
+  console.log(`- GET  /api/user/similarity`);
+  console.log(`- GET  /api/user/all`);
+  console.log(`- GET  /api/data/artists`);
+  console.log(`- GET  /api/data/songs`);
 });
 
 // Handle server errors
